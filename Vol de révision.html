@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vol de révision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#e9eef5; --muted:#93a1b5; --line:rgba(255,255,255,.10);
+  --panel:rgba(12,18,30,.72); --panel2:rgba(18,26,42,.82);
+  --amber:#ffb84d; --amber2:#ffd27a; --sky:#5cc4ff; --ok:#5fd39a; --warn:#ff7a6b;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#070b14;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,textarea{font:inherit;color:inherit}
+.hidden{display:none!important}
+.screen{position:fixed;inset:0}
+
+/* ---------- AIRPORT SCENE ---------- */
+#airport{overflow-y:auto;overflow-x:hidden}
+.scene{position:fixed;inset:0;z-index:0;overflow:hidden}
+.scene .sky{position:absolute;inset:0;background:linear-gradient(180deg,#5a9ee0 0%,#9dccf2 48%,#e6d3b0 64%,#e6d3b0 64.2%)}
+body.night .scene .sky{background:linear-gradient(180deg,#050a1c 0%,#0f1b3d 45%,#2a2f52 63%,#2a2f52 64%)}
+body.dusk .scene .sky{background:linear-gradient(180deg,#24305e 0%,#a35a6e 42%,#f2a35e 62%)}
+.scene .sun{position:absolute;left:68%;top:38%;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#fff8e0 0%,rgba(255,240,200,.55) 35%,rgba(255,240,200,0) 70%)}
+body.night .scene .sun{width:60px;height:60px;top:14%;left:78%;background:radial-gradient(circle,#f4f1e6 0%,#f4f1e6 38%,rgba(240,240,255,.15) 55%,rgba(0,0,0,0) 72%)}
+.stars{position:absolute;inset:0 0 40% 0;opacity:0;background-image:radial-gradient(1px 1px at 12% 20%,#fff,transparent),radial-gradient(1px 1px at 32% 8%,#fff,transparent),radial-gradient(1.5px 1.5px at 52% 26%,#fff,transparent),radial-gradient(1px 1px at 71% 12%,#fff,transparent),radial-gradient(1px 1px at 88% 30%,#fff,transparent),radial-gradient(1px 1px at 22% 42%,#cfe,transparent),radial-gradient(1px 1px at 62% 44%,#fff,transparent),radial-gradient(1.2px 1.2px at 6% 6%,#fff,transparent)}
+body.night .stars{opacity:.9}
+.scene .tarmac{position:absolute;left:0;right:0;bottom:0;height:36%;background:linear-gradient(180deg,#5d6066 0%,#3c3f45 40%,#2a2c31 100%)}
+body.night .scene .tarmac{background:linear-gradient(180deg,#22252c 0%,#16181d 100%)}
+.runway{position:absolute;left:-10%;right:-10%;top:22%;height:16%;background:#2f3237;transform:perspective(400px) rotateX(55deg);border-top:2px solid rgba(255,255,255,.25);border-bottom:2px solid rgba(255,255,255,.25)}
+.runway::after{content:"";position:absolute;left:0;right:0;top:46%;height:6%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.75) 0 60px,transparent 60px 120px)}
+body.night .runway::before{content:"";position:absolute;left:0;right:0;top:-6px;height:4px;background:repeating-linear-gradient(90deg,#ffd27a 0 3px,transparent 3px 40px);filter:drop-shadow(0 0 4px #ffb84d)}
+.parked{position:absolute;right:-4%;bottom:12%;width:min(900px,80vw);opacity:.95;filter:drop-shadow(0 18px 18px rgba(0,0,0,.35))}
+.mullions{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(6,10,18,.9) 0 10px,transparent 10px 240px),linear-gradient(180deg,rgba(6,10,18,.92) 0 8px,transparent 8px calc(64% - 6px),rgba(6,10,18,.92) calc(64% - 6px) calc(64% + 4px),transparent calc(64% + 4px))}
+.scene::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,8,15,.15),rgba(5,8,15,.55))}
+
+.topbar{position:relative;z-index:2;display:flex;align-items:center;gap:18px;padding:16px 28px;background:rgba(6,10,18,.78);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#ffb84d,#ff7a4d);display:grid;place-items:center;font-size:20px;box-shadow:0 6px 18px rgba(255,140,60,.35)}
+.brand b{font-weight:800;letter-spacing:.02em;font-size:17px}
+.brand small{display:block;color:var(--muted);font-size:12px;font-weight:500}
+.topbar .spacer{flex:1}
+.clock{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--amber2);letter-spacing:.06em}
+.tbtn{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid var(--line);font-size:14px;font-weight:600;transition:.15s}
+.tbtn:hover{background:rgba(255,255,255,.14)}
+
+.hall{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,1fr);gap:22px;padding:24px 28px 40px;max-width:1500px;margin:0 auto}
+@media (max-width:980px){.hall{grid-template-columns:1fr;padding:16px}.topbar{padding:12px 16px;flex-wrap:wrap}.clock{font-size:18px}}
+
+/* Departures board */
+.board{background:#0a0d12;border-radius:16px;border:1px solid #1c222c;box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 0 0 6px #11151c;padding:18px 18px 12px;align-self:start}
+.board-head{display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap}
+.board-head h2{font-family:var(--mono);color:var(--amber);font-size:22px;letter-spacing:.12em;display:flex;align-items:center;gap:10px}
+.board-head h2 span{color:#8a7a5a;font-size:13px;letter-spacing:.08em}
+.tabs{margin-left:auto;display:flex;background:#151a22;border-radius:10px;padding:4px;gap:4px}
+.tabs button{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;padding:7px 12px;border-radius:7px;color:#8b95a5}
+.tabs button.on{background:var(--amber);color:#1a1205}
+.brow{display:grid;grid-template-columns:62px 74px minmax(0,1.6fr) 74px 70px 52px 128px;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:15px;color:var(--amber2)}
+.brow.headr{color:#6d6656;font-size:11px;letter-spacing:.12em;padding-bottom:8px;border-bottom:1px solid #1d222b;border-radius:0;margin-bottom:6px}
+.brow:not(.headr){cursor:pointer;transition:background .15s}
+.brow:not(.headr):hover{background:#141922}
+.brow.sel{background:#1d1708;box-shadow:inset 0 0 0 1px rgba(255,184,77,.55)}
+.cell{display:flex;gap:1px;overflow:hidden;white-space:nowrap}
+.cell i{font-style:normal;display:inline-block;min-width:.66em;text-align:center;background:#12161d;border-radius:2px;padding:2px 0;box-shadow:inset 0 -1px 0 rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.03);position:relative}
+.cell i::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.55)}
+.cell.dest i{color:#fff2d6}
+.status{font-size:12px;letter-spacing:.06em;color:#7fd4a0}
+.sel .status{color:var(--amber);animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.board-foot{display:flex;justify-content:space-between;color:#5d6676;font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:10px 8px 0;border-top:1px solid #1d222b;margin-top:8px;gap:12px;flex-wrap:wrap}
+@media (max-width:720px){.brow{grid-template-columns:52px minmax(0,1fr) 64px 104px;font-size:13px}.c-flt,.c-ses,.c-gate{display:none!important}}
+
+/* Check-in desk */
+.desk{background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:18px;padding:22px;align-self:start;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.desk h3{font-size:19px;font-weight:800;display:flex;align-items:center;gap:10px}
+.desk h3 em{font-style:normal;font-size:12px;font-weight:700;color:#1a1205;background:var(--amber);padding:3px 8px;border-radius:6px;letter-spacing:.06em}
+.desk p.sub{color:var(--muted);font-size:13.5px;margin:6px 0 18px;line-height:1.45}
+.field{margin-bottom:18px}
+.field>label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8fa0b7;margin-bottom:8px}
+.destcard{border:1px dashed rgba(255,255,255,.18);border-radius:12px;padding:14px;color:var(--muted);font-size:14px}
+.destcard.ok{border-style:solid;border-color:rgba(255,184,77,.45);background:rgba(255,184,77,.06);color:var(--ink)}
+.destcard .route{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-weight:800;font-size:24px}
+.destcard .route .arrow{flex:1;height:2px;background:linear-gradient(90deg,var(--amber),rgba(255,184,77,.2));position:relative}
+.destcard .route .arrow::after{content:"✈";position:absolute;left:50%;top:-12px;transform:translateX(-50%);font-size:16px;color:var(--amber)}
+.destcard .cities{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
+.destcard .meta{margin-top:10px;font-size:13px;color:#c9d3e0}
+.prog{display:flex;height:10px;border-radius:6px;overflow:hidden;margin-top:10px;gap:2px}
+.prog div{height:100%}
+.prog .w{background:linear-gradient(90deg,#4aa8ff,#5cc4ff)}
+.prog .b{background:var(--amber)}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--muted);margin-top:6px}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:#5cc4ff}
+.legend span.lb::before{background:var(--amber)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:13.5px;font-weight:500;transition:.15s}
+.chip:hover{background:rgba(255,255,255,.12)}
+.chip.on{background:var(--sky);color:#04121e;border-color:var(--sky);font-weight:700}
+.inp{width:100%;padding:12px 14px;border-radius:11px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);outline:none;font-size:14.5px;transition:border .15s}
+.inp:focus{border-color:var(--sky)}
+textarea.inp{resize:vertical;min-height:64px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 18px;border-radius:12px;font-weight:800;font-size:15px;transition:.15s}
+.btn.primary{background:linear-gradient(135deg,#ffb84d,#ff8f4d);color:#1d1004;box-shadow:0 10px 26px rgba(255,140,60,.35)}
+.btn.primary:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.btn.ghost{background:rgba(255,255,255,.08);border:1px solid var(--line)}
+.btn.ghost:hover{background:rgba(255,255,255,.15)}
+.btn.danger{background:rgba(255,122,107,.16);color:#ffb3a9;border:1px solid rgba(255,122,107,.35)}
+.btn.wide{width:100%}
+.err{color:#ff9d90;font-size:13px;margin-top:10px;min-height:18px}
+.hint{position:relative;z-index:1;text-align:center;color:rgba(220,230,245,.7);font-size:12.5px;padding:0 20px 30px}
+
+/* ---------- MODALS ---------- */
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(3,6,12,.7);backdrop-filter:blur(6px);padding:16px;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.mbox{background:#101724;border:1px solid var(--line);border-radius:18px;padding:24px;width:min(560px,100%);max-height:90vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.mbox h3{font-size:20px;font-weight:800;margin-bottom:6px}
+.mbox p{color:var(--muted);font-size:14px;line-height:1.5}
+.mrow{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.mrow .btn{flex:1}
+.seg{display:flex;background:rgba(255,255,255,.06);border-radius:10px;padding:4px;gap:4px;margin-top:8px}
+.seg button{flex:1;padding:9px 6px;border-radius:7px;font-size:13px;font-weight:600;color:#aab6c6}
+.seg button.on{background:var(--sky);color:#04121e}
+.setrow{margin-top:16px}
+.setrow>b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#8fa0b7}
+.setrow small{display:block;color:var(--muted);font-size:12px;margin-top:6px}
+
+/* Boarding pass */
+.pass{width:min(760px,100%);display:flex;border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.6);animation:printin .7s cubic-bezier(.2,.8,.2,1)}
+@keyframes printin{from{transform:translateY(-40px) scale(.97);opacity:0}}
+.pass .main{flex:1;background:#f6f3ec;color:#1b2230;padding:0}
+.pass .ph{background:linear-gradient(135deg,#13294b,#1f4d8a);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between}
+.pass .ph b{font-weight:800;letter-spacing:.14em;font-size:13px}
+.pass .ph span{font-family:var(--mono);font-size:12px;opacity:.85}
+.pass .pb{padding:18px 22px 20px}
+.pass .big{display:flex;align-items:center;gap:16px;margin:4px 0 14px}
+.pass .big .code{font-family:var(--mono);font-size:44px;font-weight:800;line-height:1;color:#13294b}
+.pass .big .city{font-size:12px;color:#5b6474;font-weight:600}
+.pass .big .mid{flex:1;text-align:center;color:#1f4d8a;font-size:22px;position:relative}
+.pass .big .mid::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px dashed #b9c3d2;z-index:0}
+.pass .big .mid span{position:relative;background:#f6f3ec;padding:0 10px}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 16px}
+.pgrid div small{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;color:#7a8394;text-transform:uppercase}
+.pgrid div b{font-size:15px;font-weight:800;color:#1b2230;font-family:var(--mono)}
+.pgrid .wide{grid-column:span 2}
+.pgrid .full{grid-column:1/-1}
+.pgrid .full b,.pgrid .wide b{font-family:var(--sans)}
+.pass .stub{width:200px;background:#ece7dc;color:#1b2230;border-left:2px dashed #b6ae9d;padding:16px;display:flex;flex-direction:column;gap:10px;position:relative}
+.pass .stub::before,.pass .stub::after{content:"";position:absolute;left:-12px;width:22px;height:22px;border-radius:50%;background:rgba(3,6,12,.85)}
+.pass .stub::before{top:-11px}.pass .stub::after{bottom:-11px}
+.pass .stub small{font-size:10px;font-weight:700;letter-spacing:.12em;color:#7a8394}
+.pass .stub b{font-family:var(--mono);font-size:16px}
+.barcode{height:64px;margin-top:auto;display:flex;align-items:stretch;gap:1.5px}
+.barcode i{background:#1b2230;display:block}
+.passwrap{display:flex;flex-direction:column;align-items:center;gap:16px;width:min(760px,100%)}
+.passwrap .mrow{width:100%;margin:0}
+@media (max-width:640px){.pass{flex-direction:column}.pass .stub{width:auto;border-left:0;border-top:2px dashed #b6ae9d;flex-direction:row;flex-wrap:wrap}.pass .stub::before,.pass .stub::after{display:none}.barcode{width:100%;height:44px}.pgrid{grid-template-columns:repeat(2,1fr)}.pass .big .code{font-size:34px}}
+
+/* Passport */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.stat{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat b{display:block;font-size:22px;font-weight:800;font-family:var(--mono);color:var(--amber2)}
+.stat small{color:var(--muted);font-size:12px}
+.bars{display:flex;flex-direction:column;gap:8px;margin:8px 0 18px}
+.bar{display:grid;grid-template-columns:140px 1fr 60px;gap:10px;align-items:center;font-size:13px}
+.bar .t{height:8px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden}
+.bar .t div{height:100%;background:var(--sky);border-radius:5px}
+.bar span:last-child{text-align:right;color:var(--muted);font-family:var(--mono);font-size:12px}
+.stamps{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:12px;padding:16px;background:linear-gradient(180deg,#efe8d6,#e3d9c1);border-radius:12px;min-height:120px}
+.stamp{aspect-ratio:1;border-radius:50%;border:3px solid currentColor;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:var(--mono);font-weight:800;padding:8px;opacity:.85;position:relative}
+.stamp::before{content:"";position:absolute;inset:5px;border-radius:50%;border:1.5px dashed currentColor;opacity:.6}
+.stamp b{font-size:20px;line-height:1}
+.stamp small{font-size:9px;letter-spacing:.06em;margin-top:3px;line-height:1.2;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stamps .empty{grid-column:1/-1;color:#7d725b;font-size:13.5px;text-align:center;align-self:center}
+
+/* ---------- TRANSITION ---------- */
+#transition{position:fixed;inset:0;z-index:40;background:#05080f;display:grid;place-items:center;text-align:center}
+#transition .tt{font-family:var(--mono);color:var(--amber);font-size:clamp(20px,3vw,30px);font-weight:800;letter-spacing:.12em}
+#transition .ts{color:var(--muted);margin-top:10px;font-size:15px}
+#transition .dots{display:flex;gap:8px;justify-content:center;margin-top:22px}
+#transition .dots i{width:9px;height:9px;border-radius:50%;background:var(--amber);animation:dot 1s infinite}
+#transition .dots i:nth-child(2){animation-delay:.15s}#transition .dots i:nth-child(3){animation-delay:.3s}
+@keyframes dot{50%{opacity:.2;transform:scale(.7)}}
+
+/* ---------- FLIGHT ---------- */
+#flight{background:#000}
+#sky{position:absolute;inset:0;width:100%;height:100%;display:block}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 55%,rgba(0,0,0,0) 55%,rgba(0,0,0,.42) 100%)}
+.hud{position:absolute;z-index:3;font-family:var(--sans)}
+.glass{background:rgba(8,13,22,.62);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#hudRoute{top:16px;left:50%;transform:translateX(-50%);width:min(620px,calc(100% - 32px));padding:12px 18px}
+.rt{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-weight:800;font-size:17px}
+.track{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.15);position:relative}
+.track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:linear-gradient(90deg,#5cc4ff,#a5e1ff)}
+.track .ico{position:absolute;top:50%;transform:translate(-50%,-52%) rotate(90deg);font-size:16px;color:#fff;text-shadow:0 0 8px rgba(92,196,255,.9)}
+.track .brk{position:absolute;top:-3px;width:2px;height:10px;background:var(--amber);border-radius:1px}
+.over{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:#b6c3d4;margin-top:8px}
+.over b{color:#fff;font-weight:700}
+#hudTimer{left:16px;top:16px;padding:16px 20px;min-width:230px}
+#hudTimer .lbl{font-size:11px;font-weight:800;letter-spacing:.14em;color:#8fd0ff;text-transform:uppercase}
+#hudTimer .tm{font-family:var(--mono);font-size:54px;font-weight:800;line-height:1.05;letter-spacing:.02em;margin-top:4px}
+#hudTimer .tsub{font-size:12.5px;color:#aab8ca;margin-top:4px}
+#hudTimer.brk{border-color:rgba(255,184,77,.6);background:rgba(40,26,6,.7)}
+#hudTimer.brk .lbl{color:var(--amber)}
+#hudTimer .msg{display:none;font-size:13px;color:#ffe2b0;margin-top:8px;max-width:240px;line-height:1.4}
+#hudTimer.brk .msg{display:block}
+#hudInst{right:16px;top:16px;padding:12px 16px;display:grid;grid-template-columns:auto auto;gap:6px 16px;font-size:12px}
+#hudInst small{color:#8a9bb2;font-weight:700;letter-spacing:.1em;font-size:10px}
+#hudInst b{font-family:var(--mono);font-size:15px;text-align:right}
+#hudBottom{left:50%;bottom:16px;transform:translateX(-50%);width:min(760px,calc(100% - 32px));padding:12px 14px 12px 18px;display:flex;align-items:center;gap:14px}
+#hudBottom .info{flex:1;min-width:0}
+#hudBottom .info small{font-size:10.5px;font-weight:800;letter-spacing:.12em;color:#8a9bb2;text-transform:uppercase}
+#hudBottom .info div{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hudBottom .info .obj{font-weight:500;font-size:13px;color:#c2cfde}
+.ibtn{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:18px;transition:.15s;flex:none}
+.ibtn:hover{background:rgba(255,255,255,.18)}
+.ibtn.off{opacity:.45}
+.ibtn.stop{background:rgba(255,122,107,.15);border-color:rgba(255,122,107,.35)}
+#toasts{position:absolute;z-index:4;left:50%;bottom:100px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;width:min(640px,calc(100% - 32px));pointer-events:none}
+.toast{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:14px;background:rgba(8,13,22,.82);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);font-size:14px;line-height:1.45;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:tin .5s cubic-bezier(.2,.8,.2,1);transition:opacity .6s,transform .6s}
+.toast.out{opacity:0;transform:translateY(8px)}
+.toast .ti{font-size:18px;line-height:1.2}
+@keyframes tin{from{opacity:0;transform:translateY(14px)}}
+.center-panel{position:absolute;z-index:6;inset:0;display:grid;place-items:center;background:rgba(3,6,12,.5);backdrop-filter:blur(3px);padding:16px}
+.center-panel .mbox{text-align:center}
+.arrive h2{font-size:28px;font-weight:800;margin:6px 0}
+.arrive .big{font-size:46px}
+.arrive .kv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0;text-align:left}
+.arrive .kv div{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.arrive .kv small{display:block;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.arrive .kv b{font-size:15px}
+.choice{display:flex;gap:8px;margin-top:10px}
+.choice button{flex:1;padding:11px 8px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-weight:700;font-size:13.5px}
+.choice button.on{background:var(--ok);color:#04150c;border-color:var(--ok)}
+.choice button.on.mid{background:var(--amber);border-color:var(--amber);color:#1d1004}
+.choice button.on.no{background:var(--warn);border-color:var(--warn);color:#200704}
+@media (max-width:760px){
+  #hudTimer{top:auto;bottom:96px;left:16px;min-width:0;padding:10px 14px}
+  #hudTimer .tm{font-size:36px}
+  #hudInst{display:none}
+  #hudRoute{top:12px}
+  #toasts{bottom:auto;top:110px}
+  #hudBottom{gap:8px;padding:10px}
+  .ibtn{width:40px;height:40px}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= AIRPORT ================= -->
+<div id="airport" class="screen">
+  <div class="scene">
+    <div class="sky"></div><div class="stars"></div><div class="sun"></div>
+    <div class="tarmac"><div class="runway"></div></div>
+    <svg class="parked" viewBox="0 0 900 260" aria-hidden="true">
+      <defs><linearGradient id="fus" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f6f8"/><stop offset=".55" stop-color="#d9dee4"/><stop offset="1" stop-color="#8e98a4"/></linearGradient></defs>
+      <path d="M840 92 L870 18 L896 18 L880 100 Z" fill="#1f4d8a"/>
+      <path d="M60 120 Q20 122 18 140 Q20 160 70 166 L760 166 Q820 160 870 110 L880 98 L120 98 Q80 100 60 120Z" fill="url(#fus)"/>
+      <path d="M40 132 Q48 120 70 118 L78 132Z" fill="#1b2433"/>
+      <g fill="#2a3446">
+        <rect x="120" y="118" width="7" height="10" rx="2"/><rect x="140" y="118" width="7" height="10" rx="2"/><rect x="160" y="118" width="7" height="10" rx="2"/><rect x="180" y="118" width="7" height="10" rx="2"/><rect x="200" y="118" width="7" height="10" rx="2"/><rect x="220" y="118" width="7" height="10" rx="2"/><rect x="240" y="118" width="7" height="10" rx="2"/><rect x="260" y="118" width="7" height="10" rx="2"/><rect x="280" y="118" width="7" height="10" rx="2"/><rect x="300" y="118" width="7" height="10" rx="2"/><rect x="320" y="118" width="7" height="10" rx="2"/><rect x="340" y="118" width="7" height="10" rx="2"/><rect x="360" y="118" width="7" height="10" rx="2"/><rect x="380" y="118" width="7" height="10" rx="2"/><rect x="400" y="118" width="7" height="10" rx="2"/><rect x="420" y="118" width="7" height="10" rx="2"/><rect x="440" y="118" width="7" height="10" rx="2"/><rect x="460" y="118" width="7" height="10" rx="2"/><rect x="480" y="118" width="7" height="10" rx="2"/><rect x="500" y="118" width="7" height="10" rx="2"/><rect x="520" y="118" width="7" height="10" rx="2"/><rect x="540" y="118" width="7" height="10" rx="2"/><rect x="560" y="118" width="7" height="10" rx="2"/><rect x="580" y="118" width="7" height="10" rx="2"/><rect x="600" y="118" width="7" height="10" rx="2"/><rect x="620" y="118" width="7" height="10" rx="2"/><rect x="640" y="118" width="7" height="10" rx="2"/><rect x="660" y="118" width="7" height="10" rx="2"/><rect x="680" y="118" width="7" height="10" rx="2"/><rect x="700" y="118" width="7" height="10" rx="2"/>
+      </g>
+      <rect x="95" y="112" width="14" height="30" rx="3" fill="#bfc7d0" stroke="#7d8896"/>
+      <path d="M300 150 L560 150 L640 200 L600 204 Z" fill="#c9d0d8"/>
+      <ellipse cx="455" cy="190" rx="58" ry="20" fill="#cfd5dc"/><ellipse cx="402" cy="190" rx="9" ry="18" fill="#2a3446"/>
+      <path d="M90 134 L880 134" stroke="#1f4d8a" stroke-width="5"/>
+      <g fill="#1b1f26"><rect x="150" y="166" width="6" height="56"/><circle cx="153" cy="230" r="11"/><rect x="560" y="166" width="8" height="52"/><circle cx="556" cy="230" r="13"/><circle cx="582" cy="230" r="13"/></g>
+    </svg>
+    <div class="mullions"></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand"><div class="logo">✈</div><div><b>VOL DE RÉVISION</b><small>Aéroport Montpellier–Méditerranée · MPL · Terminal Révisions</small></div></div>
+    <div class="spacer"></div>
+    <div class="clock" id="clock">--:--</div>
+    <button class="tbtn" id="btnPassport">🛂 Passeport</button>
+    <button class="tbtn" id="btnSettings">⚙️ Réglages</button>
+  </header>
+
+  <main class="hall">
+    <section class="board">
+      <div class="board-head">
+        <h2>DÉPARTS <span>DEPARTURES</span></h2>
+        <div class="tabs"><button data-tab="eu" class="on">EUROPE</button><button data-tab="long">LONG-COURRIER</button></div>
+      </div>
+      <div class="brow headr"><span>HEURE</span><span class="c-flt">VOL</span><span>DESTINATION</span><span>DURÉE</span><span class="c-ses">SESSIONS</span><span class="c-gate">PORTE</span><span>STATUT</span></div>
+      <div id="rows"></div>
+      <div class="board-foot"><span>Clique sur un vol pour le sélectionner</span><span>Europe : sessions de 25 min + 5 min de pause · Long-courrier : 50 min + 10 min</span></div>
+    </section>
+
+    <section class="desk">
+      <h3>Comptoir d'enregistrement <em>CHECK-IN</em></h3>
+      <p class="sub">Choisis ton vol, ce que tu révises et ton objectif. La durée du vol est ton temps de révision ; les pauses sont servies à bord.</p>
+      <div class="field"><label>1 · Vol</label><div class="destcard" id="destcard">Aucun vol sélectionné — choisis une destination sur le tableau des départs.</div></div>
+      <div class="field"><label>2 · Matière (classe de voyage)</label><div class="chips" id="chips"></div>
+        <input class="inp hidden" id="customSubj" maxlength="40" placeholder="Nom de la matière" style="margin-top:10px"></div>
+      <div class="field"><label>3 · Objectif du vol</label><input class="inp" id="objective" maxlength="120" placeholder="Ex. : refaire les exercices du chapitre 4 sur les amortissements"></div>
+      <div class="field"><label>4 · Passager</label><input class="inp" id="pname" maxlength="32" placeholder="Prénom NOM"></div>
+      <button class="btn primary wide" id="btnCheckin">🎫 Imprimer la carte d'embarquement</button>
+      <div class="err" id="err"></div>
+    </section>
+  </main>
+  <div class="hint">Le minuteur continue même si tu changes d'onglet. Les carillons annoncent les pauses et la reprise.</div>
+</div>
+
+<!-- ================= TRANSITION ================= -->
+<div id="transition" class="hidden"><div><div class="tt" id="trT">EMBARQUEMENT</div><div class="ts" id="trS"></div><div class="dots"><i></i><i></i><i></i></div></div></div>
+
+<!-- ================= FLIGHT ================= -->
+<div id="flight" class="screen hidden">
+  <canvas id="sky"></canvas>
+  <div class="vignette"></div>
+  <div class="hud glass" id="hudRoute">
+    <div class="rt"><span id="rFrom">MPL</span><div class="track" id="track"><div class="fill" id="tFill"></div><div class="ico" id="tIco">✈</div></div><span id="rTo">CDG</span></div>
+    <div class="over"><span>Survol : <b id="overLabel">—</b></span><span id="arrInfo"></span></div>
+  </div>
+  <div class="hud glass" id="hudTimer">
+    <div class="lbl" id="tLbl">Session 1/2 · Révision</div>
+    <div class="tm" id="tTime">25:00</div>
+    <div class="tsub" id="tSub"></div>
+    <div class="msg" id="tMsg">Lève-toi, bois un verre d'eau, regarde au loin. On reprend au carillon.</div>
+  </div>
+  <div class="hud glass" id="hudInst">
+    <small>ALTITUDE</small><b id="iAlt">0 ft</b>
+    <small>VITESSE SOL</small><b id="iSpd">0 km/h</b>
+    <small>HEURE LOCALE</small><b id="iClock">--:--</b>
+    <small>CIEL</small><b id="iSky">Jour</b>
+  </div>
+  <div id="toasts"></div>
+  <div class="hud glass" id="hudBottom">
+    <div class="info"><small id="bClass">Classe</small><div id="bSubj">—</div><div class="obj" id="bObj"></div></div>
+    <button class="ibtn" id="bPause" title="Mettre le vol en attente">⏸</button>
+    <button class="ibtn" id="bSound" title="Bruit moteur">🔊</button>
+    <button class="ibtn" id="bSet" title="Réglages">⚙️</button>
+    <button class="ibtn stop" id="bAbort" title="Interrompre le vol">✕</button>
+  </div>
+  <div class="center-panel hidden" id="pausePanel"><div class="mbox"><div style="font-size:40px">✋</div><h3>Vol en attente</h3><p>Le temps est figé. Reprends quand tu es prêt.</p><div class="mrow"><button class="btn primary" id="bResume">▶ Reprendre le vol</button></div></div></div>
+  <div class="center-panel hidden" id="arrivePanel"><div class="mbox arrive" id="arriveBox"></div></div>
+</div>
+
+<!-- ================= MODALS ================= -->
+<div class="modal hidden" id="mPass"><div class="passwrap"><div class="pass" id="passCard"></div>
+  <div class="mrow"><button class="btn ghost" id="bEdit">✏️ Modifier</button><button class="btn primary" id="bBoard">✈ Embarquer</button></div></div></div>
+
+<div class="modal hidden" id="mPassport"><div class="mbox" style="width:min(680px,100%)" id="passportBox"></div></div>
+
+<div class="modal hidden" id="mSettings"><div class="mbox">
+  <h3>⚙️ Réglages</h3>
+  <div class="setrow"><b>Ciel</b><div class="seg" data-set="sky"><button data-v="auto">Auto (heure réelle)</button><button data-v="day">Jour</button><button data-v="night">Nuit</button></div></div>
+  <div class="setrow"><b>Bruit moteur</b><div class="seg" data-set="engine"><button data-v="1">Activé</button><button data-v="0">Coupé</button></div><small>Bruit brun doux, utile pour se concentrer.</small></div>
+  <div class="setrow"><b>Carillon des annonces</b><div class="seg" data-set="chime"><button data-v="1">Activé</button><button data-v="0">Coupé</button></div></div>
+  <div class="setrow"><b>Vitesse d'aperçu</b><div class="seg" data-set="speed"><button data-v="1">×1 (réel)</button><button data-v="20">×20</button><button data-v="120">×120</button></div><small>Pour prévisualiser le trajet. Un vol accéléré n'est pas tamponné dans le passeport.</small></div>
+  <div class="mrow"><button class="btn primary" id="bSetClose">OK</button></div>
+</div></div>
+
+<div class="modal hidden" id="mAbort"><div class="mbox">
+  <h3>Interrompre le vol ?</h3>
+  <p id="abortTxt"></p>
+  <div class="mrow"><button class="btn ghost" id="bAbortNo">Continuer le vol</button><button class="btn danger" id="bAbortYes">Dérouter et retourner au terminal</button></div>
+</div></div>
+
+<script>
+'use strict';
+/* =========================================================
+   UTILITAIRES
+   ========================================================= */
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let SEED=1337;
+function hash2(x,y){let h=(Math.imul(x|0,374761393)+Math.imul(y|0,668265263)+Math.imul(SEED,1103515245))|0;h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return(h>>>0)/4294967296}
+function vnoise(x,y){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);const a=hash2(xi,yi),b=hash2(xi+1,yi),c=hash2(xi,yi+1),d=hash2(xi+1,yi+1);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
+function fbm(x,y,o){let s=0,a=.5,f=1,n=0;for(let i=0;i<o;i++){s+=a*vnoise(x*f+i*17.3,y*f-i*9.1);n+=a;a*=.5;f*=2.03}return s/n}
+function strHash(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+const pad=n=>String(n).padStart(2,'0');
+const hhmm=d=>pad(d.getHours())+':'+pad(d.getMinutes());
+const fmtMin=m=>m<60?`${m} min`:`${Math.floor(m/60)}h${pad(m%60)}`;
+const fmtClock=s=>{s=Math.max(0,Math.ceil(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?`${h}:${pad(m)}:${pad(x)}`:`${pad(m)}:${pad(x)}`};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function makeCanvas(w,h){const c=document.createElement('canvas');c.width=Math.max(1,Math.ceil(w));c.height=Math.max(1,Math.ceil(h));return c}
+
+/* =========================================================
+   DONNÉES : DESTINATIONS ET TRAJETS
+   Chaque trajet = suite de paysages (biome, poids, libellé).
+   ========================================================= */
+const S=(b,w,label,o)=>Object.assign({b,w,label:label||null},o||{});
+const MPL=(o)=>S('city',3,'Montpellier',Object.assign({style:'sud'},o||{}));
+const DESTS=[
+ {code:'LYS',city:'Lyon',region:'eu',work:25,n:1,gate:'A4',route:[MPL(),S('suburb',3,null,{style:'sud'}),S('vines',8,'les vignobles du Languedoc'),S('garrigue',8,'les garrigues du Gard'),S('fields',8,'la vallée du Rhône'),S('vines',7,'les Côtes-du-Rhône'),S('fields',10,'la plaine de la Drôme'),S('forest',5,'les collines du Dauphiné'),S('bocage',6,'le Nord-Isère'),S('suburb',4,null,{style:'sud'}),S('city',5,'Lyon',{style:'sud'})],
+  rivers:[{p0:.28,p1:1,x:-140,amp:90,f:.0016,w:10}]},
+ {code:'BCN',city:'Barcelone',region:'eu',work:25,n:1,gate:'A7',route:[MPL({shape:'L'}),S('suburb',2,null,{style:'sud',shape:'L'}),S('vines',7,"les vignobles de l'Hérault",{shape:'L'}),S('garrigue',6,'le littoral audois',{shape:'L'}),S('vines',6,'le Roussillon',{shape:'L'}),S('mountains',8,'les Pyrénées',{shape:'L'}),S('forest',6,'la Catalogne',{shape:'L'}),S('fields',5,"la plaine de l'Empordà",{shape:'L'}),S('suburb',3,null,{style:'sud',shape:'L'}),S('city',4,'Barcelone',{style:'sud',shape:'L'})],rivers:[]},
+ {code:'CDG',city:'Paris',region:'eu',work:25,n:2,gate:'B12',route:[MPL(),S('suburb',2,null,{style:'sud'}),S('garrigue',6,"les garrigues de l'Hérault"),S('mountains',8,'les Cévennes'),S('steppe',6,'les Causses'),S('mountains',6,'le Massif central'),S('bocage',8,"l'Auvergne"),S('forest',4,'les forêts du Bourbonnais'),S('fields',8,'la vallée de la Loire'),S('fields',10,'la Beauce'),S('suburb',4,null,{style:'paris'}),S('city',6,'Paris',{style:'paris'})],
+  rivers:[{type:'cross',p:.66,amp:60,f:.004,w:9},{p0:.9,p1:1,x:60,amp:140,f:.0024,w:9}]},
+ {code:'FCO',city:'Rome',region:'eu',work:25,n:2,gate:'B3',route:[MPL({shape:'R'}),S('polder',6,'la Camargue',{shape:'R'}),S('garrigue',6,'la Provence',{shape:'R'}),S('mountains',6,'les Alpes-Maritimes',{shape:'R'}),S('sea',8,'la mer Ligure'),S('mountains',7,'la Corse',{shape:'island'}),S('sea',14,'la mer Tyrrhénienne'),S('fields',6,'le Latium'),S('suburb',3,null,{style:'sud'}),S('city',5,'Rome',{style:'sud'})],
+  rivers:[{p0:.88,p1:1,x:-80,amp:110,f:.003,w:8}]},
+ {code:'LHR',city:'Londres',region:'eu',work:25,n:3,gate:'C21',route:[MPL(),S('suburb',2,null,{style:'sud'}),S('garrigue',4,'les garrigues'),S('mountains',8,'le Massif central'),S('bocage',8,'le Limousin'),S('fields',8,'le Poitou'),S('fields',8,'le Val de Loire'),S('bocage',10,'la Normandie'),S('sea',10,'la Manche'),S('bocage',10,'la campagne du Sussex'),S('suburb',4,null,{style:'brique'}),S('city',6,'Londres',{style:'brique'})],
+  rivers:[{type:'cross',p:.47,amp:70,f:.0035,w:10},{p0:.92,p1:1,x:-30,amp:150,f:.0028,w:11}]},
+ {code:'AMS',city:'Amsterdam',region:'eu',work:25,n:3,gate:'C9',route:[MPL(),S('suburb',2,null,{style:'sud'}),S('garrigue',4,'les garrigues'),S('fields',6,'la vallée du Rhône'),S('vines',7,'la Bourgogne'),S('fields',8,'la Champagne'),S('forest',8,'les Ardennes'),S('fields',8,'la Wallonie'),S('bocage',6,'la Flandre'),S('polder',10,'les polders néerlandais'),S('suburb',3,null,{style:'brique'}),S('city',5,'Amsterdam',{style:'brique'})],
+  rivers:[{p0:.12,p1:.3,x:-60,amp:90,f:.0018,w:10},{type:'cross',p:.6,amp:60,f:.004,w:8}]},
+ {code:'LIS',city:'Lisbonne',region:'eu',work:25,n:3,gate:'A11',route:[MPL({shape:'L'}),S('vines',5,'le Languedoc',{shape:'L'}),S('mountains',8,'les Pyrénées'),S('steppe',10,"l'Aragon"),S('steppe',8,'la Meseta'),S('suburb',2,null,{style:'sud'}),S('city',4,'Madrid',{style:'sud'}),S('suburb',2,null,{style:'sud'}),S('steppe',8,'la Castille'),S('garrigue',10,"l'Estrémadure"),S('fields',6,"l'Alentejo"),S('suburb',3,null,{style:'blanc'}),S('city',5,'Lisbonne',{style:'blanc',shape:'L'})],
+  rivers:[{p0:.86,p1:1,x:-90,amp:120,f:.0022,w:12}]},
+ {code:'BER',city:'Berlin',region:'eu',work:25,n:4,gate:'D2',route:[MPL(),S('suburb',2,null,{style:'sud'}),S('garrigue',4,'les garrigues'),S('fields',6,'la vallée du Rhône'),S('vines',4,'la Savoie'),S('alps',12,'les Alpes suisses'),S('fields',8,'le Plateau suisse'),S('forest',8,'la Forêt-Noire'),S('fields',10,'la Bavière'),S('forest',8,'la Thuringe'),S('fields',10,'la Saxe'),S('suburb',4,null,{style:'moderne'}),S('city',6,'Berlin',{style:'moderne'})],
+  rivers:[{type:'cross',p:.62,amp:70,f:.003,w:11},{type:'cross',p:.85,amp:60,f:.0035,w:10}]},
+ {code:'ATH',city:'Athènes',region:'eu',work:25,n:4,gate:'D8',route:[MPL({shape:'R'}),S('polder',4,'la Camargue',{shape:'R'}),S('garrigue',5,'la Provence',{shape:'R'}),S('alps',10,'les Alpes'),S('fields',10,'la plaine du Pô'),S('sea',12,"la mer Adriatique"),S('mountains',12,'les Balkans'),S('mountains',8,"l'Épire"),S('sea',6,'le golfe de Corinthe'),S('garrigue',6,"l'Attique"),S('city',6,'Athènes',{style:'blanc'})],
+  rivers:[{p0:.28,p1:.38,x:20,amp:100,f:.002,w:10}]},
+ {code:'RAK',city:'Marrakech',region:'long',work:50,n:2,gate:'E5',route:[MPL({shape:'L'}),S('vines',3,null,{shape:'L'}),S('mountains',6,'les Pyrénées'),S('steppe',10,"l'Aragon"),S('steppe',10,'la Castille-La Manche'),S('mountains',6,'la Sierra Nevada'),S('garrigue',6,"l'Andalousie"),S('sea',6,'le détroit de Gibraltar'),S('steppe',10,'les plaines du Maroc'),S('garrigue',8,'le Haouz'),S('desert',6,'les plateaux arides'),S('city',5,'Marrakech',{style:'ocre'})],rivers:[]},
+ {code:'JFK',city:'New York',region:'long',work:50,n:3,gate:'F14',route:[MPL(),S('garrigue',2,null),S('mountains',4,'le Massif central'),S('bocage',6,'la Bretagne'),S('sea',60,"l'océan Atlantique"),S('forest',5,'la Nouvelle-Angleterre',{shape:'R'}),S('suburb',4,'Long Island',{style:'moderne',shape:'R'}),S('city',6,'New York',{style:'moderne',shape:'R'})],
+  rivers:[{p0:.94,p1:1,x:-120,amp:40,f:.002,w:16}]},
+ {code:'YUL',city:'Montréal',region:'long',work:50,n:3,gate:'F2',route:[MPL(),S('garrigue',2,null),S('mountains',4,'le Massif central'),S('bocage',5,'la Bretagne'),S('sea',48,"l'océan Atlantique"),S('taiga',10,'Terre-Neuve'),S('sea',5,'le golfe du Saint-Laurent'),S('taiga',10,'le Québec boréal'),S('forest',6,'les Laurentides'),S('fields',4,'la plaine du Saint-Laurent'),S('suburb',3,null,{style:'moderne'}),S('city',5,'Montréal',{style:'moderne'})],
+  rivers:[{p0:.88,p1:1,x:150,amp:60,f:.0015,w:18}]},
+ {code:'GIG',city:'Rio de Janeiro',region:'long',work:50,n:4,gate:'G6',route:[MPL({shape:'L'}),S('vines',2,null,{shape:'L'}),S('mountains',4,'les Pyrénées'),S('steppe',8,'la Meseta'),S('garrigue',4,"l'Andalousie"),S('sea',46,"l'océan Atlantique"),S('tropical',8,'la forêt atlantique',{shape:'L'}),S('mountains',4,'la Serra do Mar',{shape:'L'}),S('suburb',3,null,{style:'moderne',shape:'L'}),S('city',5,'Rio de Janeiro',{style:'moderne',shape:'L'})],rivers:[]},
+ {code:'HND',city:'Tokyo',region:'long',work:50,n:5,gate:'G1',route:[MPL(),S('suburb',1,null,{style:'sud'}),S('garrigue',2,null),S('alps',5,'les Alpes'),S('fields',6,"l'Autriche"),S('fields',6,'la plaine de Hongrie'),S('mountains',5,'les Carpates'),S('sea',6,'la mer Noire'),S('mountains',6,'le Caucase'),S('sea',4,'la mer Caspienne'),S('desert',10,"les déserts d'Asie centrale"),S('mountains',6,'le Tian Shan'),S('desert',10,'le désert de Gobi'),S('steppe',5,'la Mongolie intérieure'),S('fields',8,'la plaine de Chine du Nord'),S('sea',8,'la mer Jaune'),S('mountains',5,'la péninsule coréenne'),S('sea',6,'la mer du Japon'),S('alps',4,'les Alpes japonaises'),S('suburb',3,null,{style:'jp'}),S('city',6,'Tokyo',{style:'jp'})],
+  rivers:[{type:'cross',p:.2,amp:70,f:.003,w:12},{type:'cross',p:.66,amp:80,f:.0025,w:14}]},
+];
+DESTS.forEach((d,i)=>{d.brk=d.work===25?5:10;d.total=d.n*d.work+(d.n-1)*d.brk;d.flt='RV '+(203+i*17)});
+
+const SUBJECTS=['Comptabilité générale','Comptabilité de gestion','Droit','Microéconomie','Macroéconomie','Statistiques','Mathématiques','Gestion financière','Fiscalité','Anglais'];
+
+/* =========================================================
+   STOCKAGE (navigateur, best-effort)
+   ========================================================= */
+const KEY='volRevision.v1';
+let DB={name:'',history:[],settings:{sky:'auto',engine:true,chime:true}};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s){DB=Object.assign(DB,s);DB.settings=Object.assign({sky:'auto',engine:true,chime:true},s.settings||{})}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}}
+let speedMult=1;
+
+/* =========================================================
+   TERMINAL
+   ========================================================= */
+let tab='eu', selDest=null, selSubj=null;
+function nightLevelAt(date){const h=date.getHours()+date.getMinutes()/60;if(h>=20.5||h<6.5)return 1;if(h>=19.5)return h-19.5;if(h<7.5)return 7.5-h;return 0}
+function skyNight(){const s=DB.settings.sky;if(s==='day')return 0;if(s==='night')return 1;return nightLevelAt(new Date())}
+function updateSceneSky(){const n=skyNight();document.body.classList.toggle('night',n>.6);document.body.classList.toggle('dusk',n>0&&n<=.6)}
+
+function renderBoard(){
+  const list=DESTS.filter(d=>d.region===tab);
+  const now=new Date();const base=new Date(now);base.setSeconds(0,0);base.setMinutes(Math.ceil((base.getMinutes()+1)/5)*5);
+  const rows=list.map((d,i)=>{const t=new Date(base.getTime()+i*5*60000);const sel=selDest===d;
+    const cell=(txt,cls)=>`<span class="cell flip ${cls||''}" data-t="${esc(txt)}"></span>`;
+    return `<div class="brow${sel?' sel':''}" data-code="${d.code}">${cell(hhmm(t))}${cell(d.flt.replace(' ',''),'c-flt')}${cell(d.city.toUpperCase(),'dest')}${cell(fmtMin(d.total).toUpperCase())}${cell(d.n+'×'+d.work+"'",'c-ses')}${cell(d.gate,'c-gate')}<span class="status">${sel?'EMBARQUEMENT':"À L'HEURE"}</span></div>`}).join('');
+  $('#rows').innerHTML=rows;
+  $('#rows').querySelectorAll('.brow').forEach(r=>r.onclick=()=>{selDest=DESTS.find(d=>d.code===r.dataset.code);renderBoardSel();renderDestCard()});
+  flip();
+}
+function renderBoardSel(){$('#rows').querySelectorAll('.brow').forEach(r=>{const s=selDest&&r.dataset.code===selDest.code;r.classList.toggle('sel',s);r.querySelector('.status').textContent=s?'EMBARQUEMENT':"À L'HEURE"})}
+function flip(){
+  const els=[...document.querySelectorAll('.flip')];const CH='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';let f=0;
+  els.forEach(e=>{e.innerHTML=[...e.dataset.t].map(()=>'<i> </i>').join('')});
+  const it=setInterval(()=>{f++;let done=true;els.forEach((e,ei)=>{const t=e.dataset.t;const is=e.children;for(let k=0;k<t.length;k++){const stop=4+k*1.3+ei*.35;if(f<stop){done=false;is[k].textContent=t[k]===' '?' ':CH[(Math.random()*CH.length)|0]}else is[k].textContent=t[k]}});if(done)clearInterval(it)},45);
+}
+function progHTML(d){let h='';for(let i=0;i<d.n;i++){h+=`<div class="w" style="flex:${d.work}"></div>`;if(i<d.n-1)h+=`<div class="b" style="flex:${d.brk}"></div>`}return `<div class="prog">${h}</div><div class="legend"><span>Révision ${d.n}×${d.work} min</span>${d.n>1?`<span class="lb">Pause${d.n>2?'s':''} ${d.n-1}×${d.brk} min</span>`:''}</div>`}
+function renderDestCard(){
+  const c=$('#destcard');if(!selDest){c.className='destcard';return}
+  const d=selDest;const arr=new Date(Date.now()+d.total*60000);
+  c.className='destcard ok';
+  c.innerHTML=`<div class="route"><span>MPL</span><span class="arrow"></span><span>${d.code}</span></div><div class="cities"><span>Montpellier</span><span>${esc(d.city)}</span></div>
+  <div class="meta">Vol <b>${d.flt}</b> · Porte <b>${d.gate}</b> · Durée <b>${fmtMin(d.total)}</b> · Arrivée prévue <b>${hhmm(arr)}</b></div>${progHTML(d)}`;
+}
+function renderChips(){
+  const all=[...SUBJECTS,'Autre…'];
+  $('#chips').innerHTML=all.map(s=>`<button class="chip${(selSubj===s||(s==='Autre…'&&selSubj&&!SUBJECTS.includes(selSubj)))?' on':''}" data-s="${esc(s)}">${esc(s)}</button>`).join('');
+  $('#chips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const s=b.dataset.s;if(s==='Autre…'){$('#customSubj').classList.remove('hidden');$('#customSubj').focus();selSubj=$('#customSubj').value.trim()||'Autre…'}else{$('#customSubj').classList.add('hidden');selSubj=s}renderChips()});
+}
+$('#customSubj').addEventListener('input',e=>{selSubj=e.target.value.trim()||'Autre…'});
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));renderBoard()});
+$('#pname').value=DB.name||'';
+
+let ticket=null;
+$('#btnCheckin').onclick=()=>{
+  const err=$('#err');err.textContent='';
+  if(!selDest){err.textContent='Choisis d’abord un vol sur le tableau des départs.';return}
+  let subj=selSubj;if(subj==='Autre…'||(subj&&!SUBJECTS.includes(subj)))subj=$('#customSubj').value.trim();
+  if(!subj){err.textContent='Indique la matière que tu vas réviser.';return}
+  const name=$('#pname').value.trim();DB.name=name;save();
+  const r=mulberry32(Date.now()&0xffff);
+  ticket={dest:selDest,subj,obj:$('#objective').value.trim(),name:name||'PASSAGER',seat:(3+((r()*28)|0))+'ABCDEF'[(r()*6)|0]};
+  showPass();
+};
+function barcode(seed){const r=mulberry32(seed);let h='';for(let i=0;i<46;i++){h+=`<i style="width:${1+((r()*3)|0)}px;opacity:${r()<.12?0:1}"></i>`}return `<div class="barcode">${h}</div>`}
+function showPass(){
+  const t=ticket,d=t.dest,dep=new Date(),arr=new Date(Date.now()+d.total*60000);
+  $('#passCard').innerHTML=`<div class="main"><div class="ph"><b>CARTE D'EMBARQUEMENT · BOARDING PASS</b><span>${d.flt}</span></div><div class="pb">
+   <div class="big"><div><div class="code">MPL</div><div class="city">Montpellier</div></div><div class="mid"><span>✈</span></div><div style="text-align:right"><div class="code">${d.code}</div><div class="city">${esc(d.city)}</div></div></div>
+   <div class="pgrid"><div class="wide"><small>Passager</small><b>${esc(t.name.toUpperCase())}</b></div><div><small>Vol</small><b>${d.flt}</b></div><div><small>Siège</small><b>${t.seat}</b></div>
+   <div><small>Départ</small><b>${hhmm(dep)}</b></div><div><small>Arrivée</small><b>${hhmm(arr)}</b></div><div><small>Porte</small><b>${d.gate}</b></div><div><small>Durée</small><b>${fmtMin(d.total)}</b></div>
+   <div class="full"><small>Classe</small><b>${esc(t.subj)}</b></div>${t.obj?`<div class="full"><small>Objectif du vol</small><b style="font-weight:600">${esc(t.obj)}</b></div>`:''}</div></div></div>
+   <div class="stub"><div><small>PASSAGER</small><br><b>${esc(t.name.split(' ')[0].toUpperCase().slice(0,12))}</b></div><div><small>VOL</small><br><b>${d.flt}</b></div><div><small>SIÈGE</small><br><b>${t.seat}</b></div><div><small>MPL → ${d.code}</small></div>${barcode(strHash(d.code+t.seat))}</div>`;
+  $('#mPass').classList.remove('hidden');
+}
+$('#bEdit').onclick=()=>$('#mPass').classList.add('hidden');
+$('#bBoard').onclick=()=>{audioInit();$('#mPass').classList.add('hidden');boardingSequence()};
+
+function boardingSequence(){
+  const tr=$('#transition');tr.classList.remove('hidden');
+  const d=ticket.dest;
+  $('#trT').textContent=`PORTE ${d.gate} · EMBARQUEMENT`;$('#trS').textContent=`Vol ${d.flt} à destination de ${d.city}`;
+  setTimeout(()=>{$('#trT').textContent='ROULAGE · DÉCOLLAGE';$('#trS').textContent='Attachez vos ceintures, éteignez les notifications.'},1500);
+  setTimeout(()=>{tr.classList.add('hidden');startFlight(ticket)},3000);
+}
+
+/* Passport */
+function openPassport(){
+  const H=DB.history||[];const done=H.filter(h=>h.completed);
+  const totalMin=H.reduce((a,h)=>a+(h.workMin||0),0);
+  const bySub={};H.forEach(h=>{bySub[h.subj]=(bySub[h.subj]||0)+(h.workMin||0)});
+  const subs=Object.entries(bySub).sort((a,b)=>b[1]-a[1]);const mx=subs.length?subs[0][1]:1;
+  const colors={yes:'#1f6b45',partial:'#9a6312',no:'#9b2f24',aborted:'#6b6b6b'};
+  $('#passportBox').innerHTML=`<h3>🛂 Passeport de révision</h3><p>Chaque vol terminé y laisse un tampon. Les données restent dans ce navigateur.</p>
+  <div class="stats"><div class="stat"><b>${fmtMin(Math.round(totalMin))}</b><small>de révision</small></div><div class="stat"><b>${done.length}</b><small>vol${done.length>1?'s':''} arrivé${done.length>1?'s':''}</small></div><div class="stat"><b>${new Set(done.map(h=>h.code)).size}</b><small>destination${new Set(done.map(h=>h.code)).size>1?'s':''}</small></div></div>
+  ${subs.length?`<div class="bars">${subs.map(([s,m])=>`<div class="bar"><span>${esc(s)}</span><div class="t"><div style="width:${Math.max(4,m/mx*100)}%"></div></div><span>${fmtMin(Math.round(m))}</span></div>`).join('')}</div>`:''}
+  <div class="stamps">${H.length?H.slice().reverse().map((h,i)=>{const k=h.completed?(h.result||'yes'):'aborted';const rot=((strHash(h.date+i)%30)-15);return `<div class="stamp" style="color:${colors[k]};transform:rotate(${rot}deg)" title="${esc(h.subj)}"><b>${h.code}</b><small>${new Date(h.date).toLocaleDateString('fr-FR')}</small><small>${h.completed?esc(h.subj):'DÉROUTÉ'}</small></div>`}).join(''):'<div class="empty">Aucun tampon pour l’instant. Ton premier vol t’attend.</div>'}</div>
+  <div class="mrow">${H.length?'<button class="btn danger" id="bClear">Effacer l’historique</button>':''}<button class="btn primary" id="bPPClose">Fermer</button></div>`;
+  $('#mPassport').classList.remove('hidden');
+  $('#bPPClose').onclick=()=>$('#mPassport').classList.add('hidden');
+  const bc=$('#bClear');if(bc)bc.onclick=()=>{if(bc.dataset.c){DB.history=[];save();openPassport()}else{bc.dataset.c=1;bc.textContent='Confirmer l’effacement'}};
+}
+$('#btnPassport').onclick=openPassport;
+
+/* Settings */
+function syncSettingsUI(){document.querySelectorAll('#mSettings .seg').forEach(seg=>{const k=seg.dataset.set;const v=k==='speed'?String(speedMult):k==='sky'?DB.settings.sky:(DB.settings[k]?'1':'0');seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v))})}
+document.querySelectorAll('#mSettings .seg button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.set,v=b.dataset.v;
+  if(k==='sky')DB.settings.sky=v;else if(k==='speed')setSpeed(+v);else DB.settings[k]=v==='1';
+  save();syncSettingsUI();updateSceneSky();if(k==='engine'){audioInit();setEngine(F&&F.running&&!F.paused&&DB.settings.engine);syncSoundBtn()}});
+function openSettings(){syncSettingsUI();$('#mSettings').classList.remove('hidden')}
+$('#btnSettings').onclick=openSettings;$('#bSetClose').onclick=()=>$('#mSettings').classList.add('hidden');
+
+setInterval(()=>{$('#clock').textContent=hhmm(new Date())},1000);$('#clock').textContent=hhmm(new Date());
+
+/* =========================================================
+   AUDIO
+   ========================================================= */
+let AC=null,engGain=null;
+function audioInit(){
+  if(AC){if(AC.state==='suspended')AC.resume().catch(()=>{});return}
+  try{AC=new(window.AudioContext||window.webkitAudioContext)();
+    const len=AC.sampleRate*4,buf=AC.createBuffer(1,len,AC.sampleRate),d=buf.getChannelData(0);let last=0;
+    for(let i=0;i<len;i++){const w=Math.random()*2-1;last=(last+.02*w)/1.02;d[i]=last*3.2}
+    const src=AC.createBufferSource();src.buffer=buf;src.loop=true;
+    const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=380;
+    engGain=AC.createGain();engGain.gain.value=0;src.connect(lp).connect(engGain).connect(AC.destination);src.start();
+  }catch(e){AC=null}
+}
+function setEngine(on){if(!AC||!engGain)return;engGain.gain.setTargetAtTime(on?.38:0,AC.currentTime,.9)}
+function chime(){
+  if(!AC||!DB.settings.chime)return;const t=AC.currentTime;
+  [[1046.5,0],[784,.62]].forEach(([f,dt])=>{[[f,.16],[f*2,.035],[f*3,.012]].forEach(([fr,a])=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=fr;g.gain.setValueAtTime(0,t+dt);g.gain.linearRampToValueAtTime(a,t+dt+.015);g.gain.exponentialRampToValueAtTime(.0001,t+dt+1.8);o.connect(g).connect(AC.destination);o.start(t+dt);o.stop(t+dt+1.9)})});
+}
+
+/* =========================================================
+   MOTEUR DE PAYSAGE (génération procédurale par blocs)
+   ========================================================= */
+const CS=6, CH=480, SPEED=26; // taille de cellule, hauteur de bloc, px/s au sol
+let R=null;           // trajet courant
+let CW=0;             // largeur des blocs
+const chunks=new Map();
+let layerC,layerX,lightC,lightX;
+
+function prepRoute(d){
+  const segs=d.route.map(s=>Object.assign({},s));const tw=segs.reduce((a,s)=>a+s.w,0);let acc=0;
+  segs.forEach(s=>{s.p0=acc/tw;acc+=s.w;s.p1=acc/tw});
+  const Dsec=d.total*60;
+  const blocks=[];let t=0;for(let i=0;i<d.n;i++){blocks.push({type:'work',s:t,e:t+d.work*60,i:i+1});t+=d.work*60;if(i<d.n-1){blocks.push({type:'break',s:t,e:t+d.brk*60,i:i+1});t+=d.brk*60}}
+  return {d,segs,rivers:d.rivers||[],Dsec,L:Dsec*SPEED,blocks};
+}
+function segIdxAt(p){const s=R.segs;if(p<=0)return 0;for(let i=0;i<s.length;i++)if(p<s[i].p1)return i;return s.length-1}
+function sampleSeg(wx,wy){const n=fbm(wx*.0022+50,wy*.0022,3);return R.segs[segIdxAt((wy+(n-.5)*900)/R.L)]}
+function isSea(shape,wx,wy){const n=(fbm(wx*.003-20,wy*.003+40,4)-.5)*520;if(shape==='L')return wx<-230+n;if(shape==='R')return wx>230-n;if(shape==='island')return Math.abs(wx)>300+n*1.3;return false}
+
+function ensureTemps(){
+  if(!layerC||layerC.width!==CW){layerC=makeCanvas(CW,CH);layerX=layerC.getContext('2d');lightC=makeCanvas(CW,CH);lightX=lightC.getContext('2d')}
+}
+function pix(ctx,g,Rz,fn){
+  const y0p=Math.floor(g.ymin/Rz)*Rz,sw=Math.ceil(g.W/Rz)+1,sh=Math.ceil((g.ymax-y0p)/Rz)+1;
+  const cv=makeCanvas(sw,sh),cx=cv.getContext('2d'),im=cx.createImageData(sw,sh),d=im.data,col=[0,0,0];
+  for(let j=0;j<sh;j++){const wy=g.y0+g.H-(y0p+(j+.5)*Rz);for(let i=0;i<sw;i++){const wx=(i+.5)*Rz-g.W/2;fn(wx,wy,col);const k=(j*sw+i)*4;d[k]=col[0];d[k+1]=col[1];d[k+2]=col[2];d[k+3]=255}}
+  cx.putImageData(im,0,0);ctx.imageSmoothingEnabled=true;ctx.drawImage(cv,0,y0p,sw*Rz,sh*Rz);
+}
+function mixc(a,b,t,o){o[0]=a[0]+(b[0]-a[0])*t;o[1]=a[1]+(b[1]-a[1])*t;o[2]=a[2]+(b[2]-a[2])*t}
+const pick=(r,a)=>a[(r()*a.length)|0];
+function bbox(ctx,g,c){ctx.fillStyle=c;ctx.fillRect(0,g.ymin,g.W,g.ymax-g.ymin)}
+function roads(ctx,g,n,color,width){
+  const off=[-210,240,-40];
+  for(let k=0;k<n;k++){ctx.beginPath();let first=true;
+    for(let py=g.ymin-8;py<=g.ymax+8;py+=6){const wy=g.y0+g.H-py;const x=g.W/2+off[k]+150*Math.sin(wy*.0019+k*2.1)+45*Math.sin(wy*.0061+k*5.3);if(first){ctx.moveTo(x,py);first=false}else ctx.lineTo(x,py)}
+    ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
+}
+function circ(p,x,y,r){p.moveTo(x+r,y);p.arc(x,y,r,0,6.2832)}
+function farm(ctx,g,r,x,y){
+  const n=2+((r()*3)|0);for(let k=0;k<n;k++){const w=3+r()*5,h=3+r()*4;ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(x+1,y+1,w,h);ctx.fillStyle=pick(r,['#b8644a','#d8d0c2','#9a9a96','#a85f44']);ctx.fillRect(x,y,w,h);x+=w+1+r()*3;y+=(r()-.5)*6}
+  g.lx.fillStyle='#ffd27a';g.lx.fillRect(x,y,1.6,1.6);g.lit=true;
+}
+function village(ctx,g,r,cx,cy,rad,pal){
+  pal=pal||['#b8643f','#c8764d','#a85a3a','#d08a5f','#d9cdb8'];
+  const sh=new Path2D(),roofs=pal.map(()=>new Path2D()),L=new Path2D();
+  const n=(rad*rad)/14|0;for(let k=0;k<n;k++){const a=r()*6.283,d=Math.sqrt(r())*rad;const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d,w=3+r()*4,h=3+r()*4;sh.rect(x+1,y+1,w,h);roofs[(r()*pal.length)|0].rect(x,y,w,h);if(r()<.35)L.rect(x+w,y+h,1.4,1.4)}
+  ctx.fillStyle='rgba(0,0,0,.32)';ctx.fill(sh);roofs.forEach((p,i)=>{ctx.fillStyle=pal[i];ctx.fill(p)});
+  g.lx.fillStyle='#ffd27a';g.lx.fill(L);g.lit=true;
+}
+
+const DRAW={};
+DRAW.fields=(ctx,g,rng,opt)=>{
+  opt=opt||{};
+  const pal=opt.pal||['#7c8c47','#a3a556','#c8b26a','#b39b6c','#6e8743','#d2c58e','#8f9d55','#a28a5c','#97a35e'];
+  bbox(ctx,g,opt.base||'#6a7542');
+  const trees=new Path2D(),tsh=new Path2D(),str=new Path2D();
+  let y=g.ymin-rng()*30;
+  while(y<g.ymax){
+    const rh=opt.polder?12+rng()*16:24+rng()*58;let x=-rng()*90;
+    while(x<g.W){
+      const pw=opt.polder?90+rng()*220:30+rng()*120;
+      ctx.fillStyle=pick(rng,pal);ctx.fillRect(x+1,y+1,pw-2,rh-2);
+      if(rng()<.35){if(rng()<.5){for(let s=x+3;s<x+pw-2;s+=3){str.moveTo(s,y+1);str.lineTo(s,y+rh-1)}}else{for(let s=y+3;s<y+rh-2;s+=3){str.moveTo(x+1,s);str.lineTo(x+pw-1,s)}}}
+      if(opt.hedge){
+        for(let s=x;s<x+pw;s+=5+rng()*3)if(rng()<.75){const r=1.6+rng()*1.6;circ(tsh,s+1.3,y+1.3,r);circ(trees,s,y,r)}
+        for(let s=y;s<y+rh;s+=5+rng()*3)if(rng()<.75){const r=1.6+rng()*1.6;circ(tsh,x+1.3,s+1.3,r);circ(trees,x,s,r)}
+      }
+      if(rng()<(opt.polder?.03:.05))farm(ctx,g,rng,x+rng()*pw,y+rng()*rh);
+      x+=pw;
+    }
+    if(opt.polder){ctx.fillStyle='#3d6a78';ctx.fillRect(0,y-.8,g.W,1.6)}
+    y+=rh;
+  }
+  // bosquets
+  const nw=g.W*(g.ymax-g.ymin)/(opt.hedge?90000:45000);
+  for(let k=0;k<nw;k++){const cx=rng()*g.W,cy=g.ymin+rng()*(g.ymax-g.ymin),rad=8+rng()*26;const m=(rad*rad/9)|0;for(let q=0;q<m;q++){const a=rng()*6.283,d=Math.sqrt(rng())*rad,r=2+rng()*2;circ(tsh,cx+Math.cos(a)*d+1.4,cy+Math.sin(a)*d+1.4,r);circ(trees,cx+Math.cos(a)*d,cy+Math.sin(a)*d,r)}}
+  ctx.strokeStyle='rgba(40,30,10,.10)';ctx.lineWidth=1;ctx.stroke(str);
+  ctx.fillStyle='rgba(12,22,8,.45)';ctx.fill(tsh);ctx.fillStyle=opt.tree||'#3b5226';ctx.fill(trees);
+  roads(ctx,g,2,'#cfc8b6',1.8);
+  if(rng()<.35)village(ctx,g,rng,rng()*g.W,g.ymin+rng()*(g.ymax-g.ymin),14+rng()*16,opt.vpal);
+};
+DRAW.bocage=(c,g,r)=>DRAW.fields(c,g,r,{hedge:true,pal:['#6f8a45','#7f9a4f','#5f7d3c','#8ea35a','#a9a865','#93864f','#76924a'],base:'#4f6a32',tree:'#344923'});
+DRAW.polder=(c,g,r)=>DRAW.fields(c,g,r,{polder:true,pal:['#6f9a45','#82a84f','#5d8c3e','#9bb85c','#c9c27a','#7aa34a'],base:'#5c8a40',vpal:['#8c4a3a','#9b5644','#7a4034','#6f6a66']});
+
+DRAW.vines=(ctx,g,rng)=>{
+  bbox(ctx,g,'#8f7d58');
+  const rows=new Path2D(),trees=new Path2D();
+  let y=g.ymin-rng()*20;
+  while(y<g.ymax){const rh=18+rng()*34;let x=-rng()*40;
+    while(x<g.W){const pw=22+rng()*60,r=rng();
+      if(r<.72){ctx.fillStyle=pick(rng,['#a08e66','#ad9b72','#968459','#b5a47c']);ctx.fillRect(x+1,y+1,pw-2,rh-2);
+        if(rng()<.5){for(let s=x+2;s<x+pw-2;s+=3.4)rows.rect(s,y+1.5,1.5,rh-3)}else{for(let s=y+2;s<y+rh-2;s+=3.4)rows.rect(x+1.5,s,pw-3,1.5)}}
+      else if(r<.86){ctx.fillStyle=pick(rng,['#b9a77c','#c4b48a','#a7a06a']);ctx.fillRect(x+1,y+1,pw-2,rh-2)}
+      else{ctx.fillStyle='#958d62';ctx.fillRect(x+1,y+1,pw-2,rh-2);for(let a=x+3;a<x+pw-2;a+=5)for(let b=y+3;b<y+rh-2;b+=5)circ(trees,a,b,1.7)}
+      x+=pw}
+    y+=rh}
+  ctx.fillStyle='#55682f';ctx.fill(rows);ctx.fillStyle='#5b6838';ctx.fill(trees);
+  roads(ctx,g,2,'#d9d1bd',1.8);
+  if(rng()<.55)village(ctx,g,rng,rng()*g.W,g.ymin+rng()*(g.ymax-g.ymin),16+rng()*16);
+};
+DRAW.garrigue=(ctx,g,rng)=>{
+  const A=[178,163,118],B=[138,136,94],Rk=[208,201,178];
+  pix(ctx,g,3,(wx,wy,c)=>{const n=fbm(wx*.012,wy*.012,3);mixc(A,B,clamp((n-.32)*2.4,0,1),c);const h=hash2(Math.floor(wx/3),Math.floor(wy/3));if(n<.4&&h<.5)mixc(c,Rk,.45,c);const k=(h-.5)*14;c[0]+=k;c[1]+=k;c[2]+=k});
+  const p=new Path2D(),n=g.W*(g.ymax-g.ymin)/38;for(let i=0;i<n;i++){circ(p,rng()*g.W,g.ymin+rng()*(g.ymax-g.ymin),.8+rng()*1.9)}
+  ctx.fillStyle='rgba(60,76,36,.85)';ctx.fill(p);
+  roads(ctx,g,1,'#e3dcc6',1.5);
+  if(rng()<.4)village(ctx,g,rng,rng()*g.W,g.ymin+rng()*(g.ymax-g.ymin),12+rng()*12);
+};
+DRAW.steppe=(ctx,g,rng)=>{
+  const A=[192,175,124],B=[152,155,102];
+  pix(ctx,g,4,(wx,wy,c)=>{const n=fbm(wx*.005,wy*.005,4);mixc(A,B,clamp((n-.35)*2.5,0,1),c);const k=(hash2(wx>>2,wy>>2)-.5)*10;c[0]+=k;c[1]+=k;c[2]+=k});
+  const n=g.W*(g.ymax-g.ymin)/30000;for(let k=0;k<n;k++){ctx.fillStyle=rng()<.5?'rgba(255,240,200,.08)':'rgba(70,70,20,.08)';const h=80+rng()*160;ctx.fillRect(rng()*g.W-100,g.ymin+rng()*Math.max(0,g.ymax-g.ymin-h),120+rng()*260,h)}
+  roads(ctx,g,1,'#d8cfb8',1.6);
+  if(rng()<.3)village(ctx,g,rng,rng()*g.W,g.ymin+rng()*(g.ymax-g.ymin),12+rng()*12,['#c8a27a','#d6bd96','#b88a62']);
+};
+function canopy(ctx,g,rng,o){
+  pix(ctx,g,4,(wx,wy,c)=>{mixc(o.A,o.B,fbm(wx*.01,wy*.01,3),c)});
+  const sh=new Path2D(),hl=new Path2D(),groups=o.cols.map(()=>new Path2D());const s=o.sp;
+  for(let y=g.ymin-s;y<g.ymax+s;y+=s*.86)for(let x=-s;x<g.W+s;x+=s){if(rng()<o.gap)continue;
+    const px=x+(rng()-.5)*s*.9,py=y+(rng()-.5)*s*.9,r=o.r0+rng()*(o.r1-o.r0);
+    circ(sh,px+1.6,py+1.8,r);circ(groups[(rng()*groups.length)|0],px,py,r);circ(hl,px-r*.3,py-r*.3,r*.45)}
+  ctx.fillStyle='rgba(5,15,5,.5)';ctx.fill(sh);groups.forEach((p,i)=>{ctx.fillStyle=o.cols[i];ctx.fill(p)});ctx.fillStyle='rgba(255,255,230,.07)';ctx.fill(hl);
+}
+function lakes(ctx,g,thr,col){
+  const Rz=6,y0p=Math.floor(g.ymin/Rz)*Rz,sw=Math.ceil(g.W/Rz)+1,sh=Math.ceil((g.ymax-y0p)/Rz)+1;
+  const cv=makeCanvas(sw,sh),cx=cv.getContext('2d'),im=cx.createImageData(sw,sh),d=im.data;
+  for(let j=0;j<sh;j++){const wy=g.y0+g.H-(y0p+(j+.5)*Rz);for(let i=0;i<sw;i++){const wx=(i+.5)*Rz-g.W/2;const n=fbm(wx*.006+11,wy*.006-7,4);const k=(j*sw+i)*4;d[k]=col[0];d[k+1]=col[1];d[k+2]=col[2];d[k+3]=clamp((n-thr)*30,0,1)*255}}
+  cx.putImageData(im,0,0);ctx.imageSmoothingEnabled=true;ctx.drawImage(cv,0,y0p,sw*Rz,sh*Rz);
+}
+DRAW.forest=(ctx,g,rng)=>{canopy(ctx,g,rng,{A:[38,60,30],B:[58,82,42],sp:8,r0:3,r1:5.5,gap:.05,cols:['#2e4a23','#36552a','#40602e','#2a4220','#4a6a34']});roads(ctx,g,1,'#b9b29c',1.5)};
+DRAW.taiga=(ctx,g,rng)=>{canopy(ctx,g,rng,{A:[30,48,38],B:[52,70,48],sp:6.5,r0:2,r1:3.6,gap:.12,cols:['#22392b','#2a4430','#1d3226','#33503a']});lakes(ctx,g,.6,[38,72,96])};
+DRAW.tropical=(ctx,g,rng)=>{canopy(ctx,g,rng,{A:[22,58,26],B:[36,82,34],sp:11,r0:4.5,r1:8,gap:.02,cols:['#1f5a24','#2a6b2b','#357a30','#1b4d20','#3f8536']})};
+function relief(ctx,g,alps){
+  const Rz=3,y0p=Math.floor(g.ymin/Rz)*Rz,sw=Math.ceil(g.W/Rz)+1,sh=Math.ceil((g.ymax-y0p)/Rz)+1,gw=sw+2,gh=sh+2,h=new Float32Array(gw*gh);
+  for(let j=0;j<gh;j++){const wy=g.y0+g.H-(y0p+(j-.5)*Rz);for(let i=0;i<gw;i++){const wx=(i-.5)*Rz-g.W/2;const b=fbm(wx*.0045,wy*.0045,5);const r=1-Math.abs(fbm(wx*.009+70,wy*.009-30,4)*2-1);h[j*gw+i]=b*.55+r*r*.6}}
+  const cv=makeCanvas(sw,sh),cx=cv.getContext('2d'),im=cx.createImageData(sw,sh),d=im.data,c=[0,0,0];
+  const LOW=alps?[64,90,50]:[70,88,48],MID=[112,104,80],ROCK=[142,134,122],SNOW=[240,242,246];
+  for(let j=0;j<sh;j++)for(let i=0;i<sw;i++){
+    const k=(j+1)*gw+(i+1),v=h[k],s=(h[k-1]-h[k+1])+(h[k-gw]-h[k+gw]);const L=clamp(1+s*6,.5,1.3);
+    if(v<.45)mixc(LOW,MID,clamp((v-.3)/.15,0,1)*.35,c);else if(v<.6)mixc(LOW,MID,.35+(v-.45)/.15*.65,c);else mixc(MID,ROCK,clamp((v-.6)/.1,0,1),c);
+    if(alps&&v>.79)mixc(c,SNOW,clamp((v-.79)/.06,0,1),c);else if(!alps&&v>.8)mixc(c,[188,182,170],clamp((v-.8)/.08,0,1),c);
+    const hs=(hash2(i*7+j,j*13-i)-.5)*10;const q=(j*sw+i)*4;d[q]=c[0]*L+hs;d[q+1]=c[1]*L+hs;d[q+2]=c[2]*L+hs;d[q+3]=255}
+  cx.putImageData(im,0,0);ctx.imageSmoothingEnabled=true;ctx.drawImage(cv,0,y0p,sw*Rz,sh*Rz);
+}
+DRAW.mountains=(ctx,g)=>relief(ctx,g,false);
+DRAW.alps=(ctx,g)=>relief(ctx,g,true);
+DRAW.desert=(ctx,g)=>{
+  const A=[220,186,130],B=[200,148,98],ROCK=[150,118,88];
+  pix(ctx,g,3,(wx,wy,c)=>{const d=fbm(wx*.003,wy*.003,3);const ph=wx*.03+wy*.011+d*16;mixc(A,B,clamp((d-.5)*5,0,1),c);const l=.92+.1*Math.cos(ph)+.04*Math.sin(ph*2.1);c[0]*=l;c[1]*=l;c[2]*=l;const rr=fbm(wx*.01-40,wy*.01,3);if(rr>.64)mixc(c,ROCK,clamp((rr-.64)*7,0,1),c);const k=(hash2(Math.floor(wx/3),Math.floor(wy/3))-.5)*8;c[0]+=k;c[1]+=k;c[2]+=k});
+};
+const CITY={
+  sud:{roof:['#b8643f','#c8764d','#a85a3a','#d08a5f','#bf6f48','#c9b8a0'],court:'#cfc3ad',street:'#8d8a84'},
+  paris:{roof:['#8f9599','#9ba1a5','#7f868a','#a9a59a','#878c90'],court:'#b3a893',street:'#8f8c86',hauss:true},
+  brique:{roof:['#8c4a3a','#9b5644','#7a4034','#6f6a66','#8a7f76','#a3594a'],court:'#7f8a5a',street:'#85837f'},
+  moderne:{roof:['#c9ccd0','#9ea4aa','#e3e5e8','#7d848b','#5f6f7d','#b5bcc2'],court:'#8a8e90',street:'#77797b',tall:true},
+  jp:{roof:['#a8adb3','#c4c8cc','#6e7883','#3f5a72','#d9dcdf','#8b5e4b','#5a6a78'],court:'#8d9093',street:'#7a7c7e',tall:true,dense:true},
+  ocre:{roof:['#c9875a','#d39a68','#b97a4f','#e0b080','#c78f62'],court:'#d9b88f',street:'#b38a62'},
+  blanc:{roof:['#eee9df','#e2dccf','#d8d0c0','#c27b52','#e8e3d8'],court:'#cfc6b4',street:'#a59e92'}
+};
+DRAW.city=(ctx,g,rng)=>{
+  const st=CITY[g.style]||CITY.sud;bbox(ctx,g,st.street);
+  const lamps=new Path2D(),win=new Path2D(),sh=new Path2D(),parks=new Path2D(),ptrees=new Path2D(),hiL=new Path2D(),seams=new Path2D(),roofs=st.roof.map(()=>new Path2D());
+  let y=g.ymin-rng()*40;
+  while(y<g.ymax){const bh=(st.dense?22:28)+rng()*40;let x=-rng()*40;
+    while(x<g.W){const bw=(st.dense?22:28)+rng()*55,sw=rng()<.1?7:3.5;const bx=x+sw/2,by=y+sw/2,w=bw-sw,h=bh-sw;
+      for(let s=x;s<x+bw;s+=7)lamps.rect(s,y-.7,1.5,1.5);for(let s=y;s<y+bh;s+=7)lamps.rect(x-.7,s,1.5,1.5);
+      if(rng()<.07){parks.rect(bx,by,w,h);const m=w*h/40;for(let q=0;q<m;q++)circ(ptrees,bx+rng()*w,by+rng()*h,1.8+rng()*1.8)}
+      else if(st.hauss){ctx.fillStyle=pick(rng,st.roof);ctx.fillRect(bx,by,w,h);sh.rect(bx+1.5,by+1.5,w,h);
+        if(w>18&&h>18){ctx.fillStyle=st.court;ctx.fillRect(bx+8,by+8,w-16,h-16)}
+        for(let s=bx+6+rng()*5;s<bx+w-3;s+=7+rng()*5){seams.moveTo(s,by);seams.lineTo(s,by+8);seams.moveTo(s,by+h-8);seams.lineTo(s,by+h)}
+        for(let s=by+6+rng()*5;s<by+h-3;s+=7+rng()*5){seams.moveTo(bx,s);seams.lineTo(bx+8,s);seams.moveTo(bx+w-8,s);seams.lineTo(bx+w,s)}
+        const nw=w*h/50;for(let q=0;q<nw;q++)if(rng()<.5)win.rect(bx+rng()*w,by+rng()*h,1.2,1.2)}
+      else{ctx.fillStyle=st.court;ctx.fillRect(bx,by,w,h);const lot=st.tall?9+rng()*10:6+rng()*6;
+        for(let ly=by;ly<by+h-2;){const lh=Math.min(lot*(.8+rng()*.5),by+h-ly);
+          for(let lx=bx;lx<bx+w-2;){const lw=Math.min(lot*(.8+rng()*.6),bx+w-lx);
+            if(rng()>.12){const rx=lx+.5,ry=ly+.5,rw=lw-1,rh=lh-1;
+              if(st.tall){const t=2+rng()*5;sh.rect(rx+t,ry+t,rw,rh)}else sh.rect(rx+1,ry+1,rw,rh);
+              roofs[(rng()*roofs.length)|0].rect(rx,ry,rw,rh);if(!st.tall)hiL.rect(rx,ry,rw,rh/2);
+              if(rng()<.22)win.rect(rx+rng()*rw,ry+rng()*rh,1.2,1.2)}
+            lx+=lw}
+          ly+=lh}}
+      x+=bw}
+    y+=bh}
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.fill(sh);
+  roofs.forEach((p,i)=>{ctx.fillStyle=st.roof[i];ctx.fill(p)});
+  ctx.fillStyle='rgba(255,255,255,.08)';ctx.fill(hiL);
+  ctx.strokeStyle='rgba(0,0,0,.28)';ctx.lineWidth=.8;ctx.stroke(seams);
+  ctx.fillStyle='#56723f';ctx.fill(parks);ctx.fillStyle='#3e5a2e';ctx.fill(ptrees);
+  roads(ctx,g,1,'#a7a59f',4.5);
+  g.lx.fillStyle='#ffcf7a';g.lx.fill(lamps);g.lx.fillStyle='rgba(255,232,170,.8)';g.lx.fill(win);
+  if(st.tall){g.lx.strokeStyle='#fff0c8';g.lx.lineWidth=2.4;roads(g.lx,g,1,'rgba(255,225,160,.9)',2.4)}
+  g.lit=true;
+};
+DRAW.suburb=(ctx,g,rng)=>{
+  const st=CITY[g.style]||CITY.sud;bbox(ctx,g,'#7f8f58');
+  const houses=st.roof.map(()=>new Path2D()),sh=new Path2D(),trees=new Path2D(),pools=new Path2D(),streets=new Path2D(),lamps=new Path2D(),big=new Path2D();
+  let y=g.ymin-rng()*40;
+  while(y<g.ymax){const bh=40+rng()*50;let x=-rng()*60;
+    while(x<g.W){const bw=60+rng()*110;streets.rect(x,y,bw,3);streets.rect(x,y,3,bh);
+      for(let s=x;s<x+bw;s+=14)lamps.rect(s,y+.7,1.4,1.4);
+      ctx.fillStyle=pick(rng,['#7f9058','#86955d','#748652','#8d9a62','#9aa36a']);ctx.fillRect(x+3,y+3,bw-3,bh-3);
+      if(rng()<.13){const bx=x+8,by=y+8,w=(bw-16)*(.5+rng()*.4),h=(bh-16)*(.5+rng()*.4);sh.rect(bx+2,by+2,w,h);big.rect(bx,by,w,h);ctx.fillStyle='#8e8c86';ctx.fillRect(bx+w+3,by,Math.max(0,bw-16-w-3),bh-16)}
+      else for(const top of [true,false])for(let s=x+6;s<x+bw-8;s+=10+rng()*5){const hw=5+rng()*3,hh=5+rng()*3,hy=top?y+6:y+bh-6-hh;const idx=(rng()*houses.length)|0;sh.rect(s+1,hy+1,hw,hh);houses[idx].rect(s,hy,hw,hh);
+        if(g.style!=='brique'&&rng()<.12)pools.rect(s+1,top?hy+hh+3:hy-5,3,2);if(rng()<.5)circ(trees,s+hw+2,top?hy+hh+4:hy-3,1.5+rng()*1.5)}
+      x+=bw}
+    y+=bh}
+  ctx.fillStyle='#a19f98';ctx.fill(streets);ctx.fillStyle='rgba(0,0,0,.3)';ctx.fill(sh);
+  houses.forEach((p,i)=>{ctx.fillStyle=st.roof[i];ctx.fill(p)});ctx.fillStyle='#d6d6d0';ctx.fill(big);
+  ctx.fillStyle='#5ec4d6';ctx.fill(pools);ctx.fillStyle='#3f5a2b';ctx.fill(trees);
+  roads(ctx,g,1,'#a7a59f',4);
+  g.lx.fillStyle='#ffcf7a';g.lx.fill(lamps);g.lit=true;
+};
+function drawSea(ctx,g,rng,dist,cw,E,types,seaId){
+  const sm=makeCanvas(cw,E),sx=sm.getContext('2d'),im=sx.createImageData(cw,E),d=im.data,c=[0,0,0];
+  const S1=[92,176,170],S2=[44,120,148],D1=[20,62,104],D2=[10,38,72];
+  for(let j=0;j<E;j++)for(let i=0;i<cw;i++){const k=j*cw+i,dd=dist[k];const wx=(i+.5)*CS-g.W/2,wy=g.y0+g.H-(j-MG+.5)*CS;const n=fbm(wx*.0018,wy*.0018,3);
+    if(dd<=1)mixc(S1,S2,.25,c);else mixc(S2,D1,clamp((dd-1.5)/4,0,1),c);mixc(c,D2,clamp((n-.4)*1.2,0,.6)*clamp((dd-2)/4,0,1),c);
+    const q=k*4;d[q]=c[0];d[q+1]=c[1];d[q+2]=c[2];d[q+3]=255}
+  sx.putImageData(im,0,0);ctx.imageSmoothingEnabled=true;ctx.drawImage(sm,0,-MG*CS,cw*CS,E*CS);
+  const p=new Path2D(),n=g.W*g.H/600;
+  for(let k=0;k<n;k++){const x=rng()*g.W,y=rng()*g.H,i=(x/CS)|0,j=((y/CS)|0)+MG,q=j*cw+i;if(types[q]!==seaId||dist[q]<2)continue;p.moveTo(x,y);p.lineTo(x+2+rng()*5,y+(rng()-.5)*.8)}
+  ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=1;ctx.stroke(p);
+}
+function riverX(rv,wy){return rv.x+rv.amp*Math.sin(wy*rv.f)+rv.amp*.5*Math.sin(wy*rv.f*2.3+1.3)}
+function drawRivers(ctx,g){
+  let any=false;ctx.lineCap='round';
+  for(const rv of R.rivers){
+    if(rv.type==='cross'){const ry=rv.p*R.L;if(ry<g.y0-rv.amp*2-20||ry>g.y0+g.H+rv.amp*2+20)continue;any=true;
+      ctx.beginPath();for(let x=-10;x<=g.W+10;x+=5){const wx=x-g.W/2,wy=ry+rv.amp*Math.sin(wx*rv.f+1)+rv.amp*.45*Math.sin(wx*rv.f*2.7+2),py=g.y0+g.H-wy;x===-10?ctx.moveTo(x,py):ctx.lineTo(x,py)}
+      ctx.strokeStyle='#58775c';ctx.lineWidth=rv.w+3;ctx.stroke();ctx.strokeStyle='#3b6b80';ctx.lineWidth=rv.w;ctx.stroke()}
+    else{const a=rv.p0*R.L,b=rv.p1*R.L,lo=Math.max(a,g.y0-10),hi=Math.min(b,g.y0+g.H+10);if(lo>=hi)continue;any=true;
+      for(const pass of [0,1]){ctx.strokeStyle=pass?'#3b6b80':'#58775c';
+        for(let wy=lo;wy<hi;wy+=5){const t=Math.min(wy-a,b-wy),w=rv.w*(.15+.85*clamp(t/700,0,1))+(pass?0:3);ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(g.W/2+riverX(rv,wy),g.y0+g.H-wy);ctx.lineTo(g.W/2+riverX(rv,wy+5),g.y0+g.H-wy-5);ctx.stroke()}}}
+  }
+  return any;
+}
+const MG=6; // marge de cellules au-dessus/au-dessous de chaque bloc (raccords invisibles)
+function cellMask(cw,E,pred){const c=makeCanvas(cw,E),x=c.getContext('2d'),im=x.createImageData(cw,E),d=im.data;for(let k=0;k<cw*E;k++){if(pred(k))d[k*4+3]=255}x.putImageData(im,0,0);return c}
+function applyMask(ctx,m,cw,E,blur){ctx.save();ctx.globalCompositeOperation='destination-in';ctx.imageSmoothingEnabled=true;try{ctx.filter=blur?`blur(${blur}px)`:'none'}catch(e){}ctx.drawImage(m,0,-MG*CS,cw*CS,E*CS);try{ctx.filter='none'}catch(e){}ctx.restore()}
+
+function genChunk(ci){
+  ensureTemps();
+  const W=CW,H=CH,y0=ci*CH,cw=Math.ceil(W/CS)+1,chh=Math.ceil(H/CS)+1,E=chh+2*MG,N=cw*E;
+  const types=new Uint8Array(N),keys=[],keyIdx=new Map(),segOf=[],r0=[],r1=[],cnt=[];
+  for(let j=0;j<E;j++){const wy=y0+H-(j-MG+.5)*CS;for(let i=0;i<cw;i++){const wx=(i+.5)*CS-W/2;const seg=sampleSeg(wx,wy);
+    const key=(seg.b==='sea'||(seg.shape&&isSea(seg.shape,wx,wy)))?'sea':seg.b+'|'+(seg.style||'');
+    let id=keyIdx.get(key);if(id===undefined){id=keys.length;keys.push(key);keyIdx.set(key,id);segOf.push(seg);r0.push(j);r1.push(j);cnt.push(0)}
+    types[j*cw+i]=id;cnt[id]++;if(j<r0[id])r0[id]=j;if(j>r1[id])r1[id]=j}}
+  const seaId=keyIdx.has('sea')?keyIdx.get('sea'):-1;
+  const dist=new Uint8Array(N);
+  if(seaId>=0){for(let k=0;k<N;k++)dist[k]=types[k]===seaId?9:0;
+    for(let j=0;j<E;j++)for(let i=0;i<cw;i++){const k=j*cw+i;if(!dist[k])continue;let m=dist[k];if(i>0)m=Math.min(m,dist[k-1]+1);if(j>0){m=Math.min(m,dist[k-cw]+1);if(i>0)m=Math.min(m,dist[k-cw-1]+1);if(i<cw-1)m=Math.min(m,dist[k-cw+1]+1)}dist[k]=m}
+    for(let j=E-1;j>=0;j--)for(let i=cw-1;i>=0;i--){const k=j*cw+i;if(!dist[k])continue;let m=dist[k];if(i<cw-1)m=Math.min(m,dist[k+1]+1);if(j<E-1){m=Math.min(m,dist[k+cw]+1);if(i<cw-1)m=Math.min(m,dist[k+cw+1]+1);if(i>0)m=Math.min(m,dist[k+cw-1]+1)}dist[k]=m}}
+  const c=makeCanvas(W,H),x=c.getContext('2d');let lc=null,lx=null;
+  const land=keys.map((k,i)=>i).filter(i=>keys[i]!=='sea').sort((a,b)=>cnt[b]-cnt[a]);
+  land.forEach((id,order)=>{const [b,style]=keys[id].split('|');
+    const full=order===0;
+    const g={W,H,y0,style,seg:segOf[id],lx:lightX,lit:false,ymin:full?0:clamp((r0[id]-MG-3)*CS,0,H),ymax:full?H:clamp((r1[id]-MG+4)*CS,0,H)};
+    layerX.clearRect(0,0,W,H);lightX.clearRect(0,0,W,H);
+    (DRAW[b]||DRAW.fields)(layerX,g,mulberry32(ci*7919+id*104729+SEED));
+    const m=cellMask(cw,E,k=>types[k]===id);
+    if(!full)applyMask(layerX,m,cw,E,2.5);
+    x.drawImage(layerC,0,0);
+    if(g.lit){applyMask(lightX,m,cw,E,2.5);if(!lc){lc=makeCanvas(W,H);lx=lc.getContext('2d')}lx.drawImage(lightC,0,0)}});
+  if(land.length&&R.rivers.length){layerX.clearRect(0,0,W,H);if(drawRivers(layerX,{W,H,y0})){if(seaId>=0)applyMask(layerX,cellMask(cw,E,k=>types[k]!==seaId),cw,E,2);x.drawImage(layerC,0,0)}}
+  if(seaId>=0){
+    const nearSea=k=>{const i=k%cw,j=(k/cw)|0;for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){const ii=i+di,jj=j+dj;if(ii<0||jj<0||ii>=cw||jj>=E)continue;if(types[jj*cw+ii]===seaId)return true}return false};
+    if(land.length){layerX.clearRect(0,0,W,H);layerX.fillStyle='#d9cb9c';layerX.fillRect(0,0,W,H);applyMask(layerX,cellMask(cw,E,k=>dist[k]>0||nearSea(k)),cw,E,3);x.drawImage(layerC,0,0)}
+    layerX.clearRect(0,0,W,H);drawSea(layerX,{W,H,y0},mulberry32(ci*31+7),dist,cw,E,types,seaId);
+    applyMask(layerX,cellMask(cw,E,k=>types[k]===seaId),cw,E,land.length?3.5:0);x.drawImage(layerC,0,0);
+  }
+  if(lc){const gc=makeCanvas(W,H),gx=gc.getContext('2d');try{gx.filter='blur(2.5px)';gx.drawImage(lc,0,0);gx.filter='none'}catch(e){}gx.globalAlpha=.9;gx.drawImage(lc,0,0);lc=gc}
+  return {c,l:lc};
+}
+function getChunk(ci){let ch=chunks.get(ci);if(!ch){ch=genChunk(ci);chunks.set(ci,ch)}return ch}
+
+/* =========================================================
+   NUAGES ET AVION
+   ========================================================= */
+let CLOUDS=null,PLANE=null,PLANE_DARK=null,PLANE_SH=null;
+function makeClouds(){
+  const out=[];for(let s=0;s<7;s++){const w=380,h=250,c=makeCanvas(w,h),x=c.getContext('2d'),r=mulberry32(99+s*13);
+    for(let k=0;k<30;k++){const a=r()*6.283,d=Math.sqrt(r()),cx=w/2+Math.cos(a)*d*w*.3,cy=h/2+Math.sin(a)*d*h*.24,rad=26+r()*58;const gr=x.createRadialGradient(cx,cy,0,cx,cy,rad);gr.addColorStop(0,'rgba(255,255,255,.6)');gr.addColorStop(.55,'rgba(255,255,255,.28)');gr.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=gr;x.fillRect(cx-rad,cy-rad,rad*2,rad*2)}
+    x.globalCompositeOperation='source-atop';const lg=x.createLinearGradient(0,0,0,h);lg.addColorStop(0,'rgba(255,255,255,0)');lg.addColorStop(1,'rgba(150,160,180,.35)');x.fillStyle=lg;x.fillRect(0,0,w,h);
+    const sc=makeCanvas(w,h),sx=sc.getContext('2d');sx.drawImage(c,0,0);sx.globalCompositeOperation='source-in';sx.fillStyle='rgba(0,0,0,.55)';sx.fillRect(0,0,w,h);
+    out.push({c,s:sc,w,h})}
+  return out;
+}
+function makePlane(){
+  const S=3,size=140,c=makeCanvas(size*S,size*S),x=c.getContext('2d');x.scale(S,S);const cx=70;
+  const wg=x.createLinearGradient(0,52,0,90);wg.addColorStop(0,'#f1f4f7');wg.addColorStop(1,'#bcc4cd');
+  const wing=dir=>{x.beginPath();x.moveTo(cx+dir*5,52);x.lineTo(cx+dir*64,82);x.quadraticCurveTo(cx+dir*67,84,cx+dir*66,88);x.lineTo(cx+dir*5,74);x.closePath()};
+  [-1,1].forEach(dir=>{x.fillStyle=wg;wing(dir);x.fill();x.strokeStyle='rgba(70,80,95,.35)';x.lineWidth=.6;x.beginPath();x.moveTo(cx+dir*12,75);x.lineTo(cx+dir*58,87);x.stroke();
+    x.fillStyle='#1f4d8a';x.beginPath();x.moveTo(cx+dir*64,82);x.lineTo(cx+dir*67,82);x.lineTo(cx+dir*67,89);x.lineTo(cx+dir*65,88);x.fill();
+    x.fillStyle='#aeb7c1';x.beginPath();x.ellipse(cx+dir*26,68,4.2,10,0,0,6.283);x.fill();x.fillStyle='#e6eaee';x.beginPath();x.ellipse(cx+dir*25.4,67,2,7,0,0,6.283);x.fill();
+    x.fillStyle='#39424d';x.beginPath();x.ellipse(cx+dir*26,58.6,3.4,1.5,0,0,6.283);x.fill();
+    x.fillStyle=wg;x.beginPath();x.moveTo(cx+dir*4,111);x.lineTo(cx+dir*25,123);x.lineTo(cx+dir*25,127);x.lineTo(cx+dir*4,121);x.closePath();x.fill()});
+  const fg=x.createLinearGradient(cx-7,0,cx+7,0);fg.addColorStop(0,'#bfc7d0');fg.addColorStop(.42,'#ffffff');fg.addColorStop(.6,'#eef1f4');fg.addColorStop(1,'#aeb7c1');
+  x.fillStyle=fg;x.beginPath();x.moveTo(cx,6);x.bezierCurveTo(cx+7,8,cx+7,18,cx+7,26);x.lineTo(cx+7,108);x.bezierCurveTo(cx+7,122,cx+2,132,cx,134);x.bezierCurveTo(cx-2,132,cx-7,122,cx-7,108);x.lineTo(cx-7,26);x.bezierCurveTo(cx-7,18,cx-7,8,cx,6);x.fill();
+  x.fillStyle='#1f4d8a';x.beginPath();x.moveTo(cx-1.7,102);x.lineTo(cx+1.7,102);x.lineTo(cx+1.1,134);x.lineTo(cx-1.1,134);x.fill();
+  x.fillStyle='#ff9a3c';x.fillRect(cx-.6,40,1.2,50);
+  x.fillStyle='#202a36';x.beginPath();x.moveTo(cx-4.3,15.5);x.quadraticCurveTo(cx,11,cx+4.3,15.5);x.lineTo(cx+3.8,17.6);x.quadraticCurveTo(cx,14.2,cx-3.8,17.6);x.closePath();x.fill();
+  const tint=(col)=>{const t=makeCanvas(c.width,c.height),tx=t.getContext('2d');tx.drawImage(c,0,0);tx.globalCompositeOperation='source-in';tx.fillStyle=col;tx.fillRect(0,0,t.width,t.height);return t};
+  return {c,dark:tint('#0d1426'),sh:tint('rgba(0,0,0,1)'),S,size};
+}
+
+/* =========================================================
+   VOL
+   ========================================================= */
+const cv=$('#sky'),ctx=cv.getContext('2d');
+let F=null,Wv=0,Hv=0,dpr=1,raf=0;
+function resize(){dpr=Math.min(window.devicePixelRatio||1,2);Wv=window.innerWidth;Hv=window.innerHeight;cv.width=Wv*dpr;cv.height=Hv*dpr;
+  const need=Math.ceil((Wv+60)/CS)*CS;if(need>CW||need<CW*.7){CW=need;chunks.clear()}}
+window.addEventListener('resize',()=>{if(F)resize()});
+
+function setSpeed(v){if(F){F.accum=curElapsed();F.t0=performance.now();if(v>1)F.demo=true}speedMult=v}
+function curElapsed(){if(!F)return 0;const e=(F.running&&!F.paused)?F.accum+(performance.now()-F.t0)/1000*speedMult:F.accum;return Math.min(e,R.Dsec)}
+function altFrac(T){const climb=Math.min(600,R.Dsec*.15),desc=Math.min(900,R.Dsec*.2);return sstep(0,climb,T)*(1-sstep(R.Dsec-desc,R.Dsec,T))}
+function workSecs(T){return R.blocks.filter(b=>b.type==='work').reduce((a,b)=>a+clamp(T-b.s,0,b.e-b.s),0)}
+function blockAt(T){for(const b of R.blocks)if(T<b.e)return b;return R.blocks[R.blocks.length-1]}
+function cloudDensity(p){const s=R.segs[segIdxAt(p)];return s.b==='sea'?1:(s.b==='mountains'||s.b==='alps')?.75:s.b==='desert'?.12:s.b==='city'?.3:.45}
+
+function startFlight(t){
+  R=prepRoute(t.dest);SEED=strHash(t.dest.code)%100000;
+  if(!CLOUDS)CLOUDS=makeClouds();if(!PLANE)PLANE=makePlane();
+  $('#airport').classList.add('hidden');$('#flight').classList.remove('hidden');
+  CW=0;resize();chunks.clear();
+  F={t,accum:0,t0:performance.now(),running:true,paused:false,demo:speedMult>1,lastBlock:null,lastSeg:0,flags:{},overLabel:'Montpellier',
+     layers:[{f:1.45,a:.88,k:1,list:[],next:-2000},{f:2.5,a:.30,k:1.9,list:[],next:-2000}],lastHud:0,arrived:false};
+  $('#rFrom').textContent='MPL';$('#rTo').textContent=t.dest.code;
+  $('#bClass').textContent='Classe · '+t.dest.flt;$('#bSubj').textContent=t.subj;$('#bObj').textContent=t.obj?('🎯 '+t.obj):'';
+  const tr=$('#track');tr.querySelectorAll('.brk').forEach(e=>e.remove());R.blocks.filter(b=>b.type==='break').forEach(b=>{const m=document.createElement('div');m.className='brk';m.style.left=(b.s/R.Dsec*100)+'%';m.style.width=Math.max(2,(b.e-b.s)/R.Dsec*100)+'%';m.style.background='rgba(255,184,77,.85)';m.style.height='4px';m.style.top='0';tr.appendChild(m)});
+  $('#toasts').innerHTML='';$('#pausePanel').classList.add('hidden');$('#arrivePanel').classList.add('hidden');
+  syncSoundBtn();setEngine(DB.settings.engine);chime();
+  announce(`Mesdames et messieurs, bienvenue à bord du vol ${t.dest.flt} à destination de ${t.dest.city}. Durée du vol : ${fmtMin(t.dest.total)}. Au programme : ${t.subj}. Bonnes révisions !`,'🧑‍✈️',9000);
+  cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);
+}
+
+function announce(text,icon,ms){
+  const box=$('#toasts');while(box.children.length>=2)box.firstChild.remove();
+  const el=document.createElement('div');el.className='toast';el.innerHTML=`<span class="ti">${icon||'📢'}</span><span>${esc(text)}</span>`;box.appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),700)},ms||7000);
+}
+
+function logic(){
+  if(!F||F.arrived)return;
+  const T=curElapsed(),p=T/R.Dsec,d=R.d;
+  const b=blockAt(T);
+  if(F.lastBlock!==b){if(F.lastBlock){chime();
+      if(b.type==='break')announce(`Service à bord : pause de ${d.brk} minutes. Lève-toi, bois un verre d'eau, éloigne-toi de l'écran.`,'☕',10000);
+      else announce(`Fin du service. Retour à la révision — session ${b.i}/${d.n}.`,'📚',8000)}
+    F.lastBlock=b}
+  const si=segIdxAt(p);
+  for(let k=si;k>=0;k--)if(R.segs[k].label){F.overLabel=R.segs[k].label;break}
+  if(si!==F.lastSeg){F.lastSeg=si;const s=R.segs[si];if(s.label){
+      if(si===R.segs.length-1)announce(`Nous survolons maintenant ${s.label}. Atterrissage imminent : termine ta phrase !`,'🛬');
+      else if(s.b==='sea')announce(`Nous survolons actuellement ${s.label}.`,'🌊');
+      else announce(`Nous survolons actuellement ${s.label}.`,'🗺️')}}
+  const climb=Math.min(600,R.Dsec*.15),desc=Math.min(900,R.Dsec*.2);
+  if(!F.flags.cruise&&T>=climb&&T<R.Dsec-desc){F.flags.cruise=1;announce('Altitude de croisière atteinte. Le voyant « concentration » est allumé : téléphone face cachée.','✈️')}
+  if(!F.flags.desc&&T>=R.Dsec-desc&&R.Dsec-T>60&&R.Dsec>600){F.flags.desc=1;chime();announce(`Nous entamons notre descente vers ${d.city}. Encore ${Math.round((R.Dsec-T)/60)} minutes : c'est le moment de récapituler.`,'🛬',9000)}
+  const rem=b.e-T;document.title=(b.type==='break'?'☕ ':'✈ ')+fmtClock(rem)+' · '+F.t.subj;
+  if(T>=R.Dsec)arrive();
+}
+setInterval(logic,500);
+
+function frame(now){
+  raf=requestAnimationFrame(frame);
+  if(!F)return;
+  const T=curElapsed(),p=clamp(T/R.Dsec,0,1),cam=p*R.L,af=altFrac(T),z=1+1.2*Math.pow(1-af,1.5);
+  const night=skyNight(),tsec=now/1000,PY=Hv*.6;
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
+  ctx.fillStyle='#1d2a1a';ctx.fillRect(0,0,Wv,Hv);
+  // sol
+  const lo=cam-(Hv-PY)/z-4,hi=cam+PY/z+4,c0=Math.floor(lo/CH),c1=Math.floor(hi/CH);
+  ctx.save();ctx.translate(Wv/2,PY);ctx.scale(z,z);ctx.imageSmoothingEnabled=true;
+  for(let ci=c0;ci<=c1;ci++){const ch=getChunk(ci);ctx.drawImage(ch.c,-CW/2,cam-ci*CH-CH-.5,CW,CH+1)}
+  ctx.restore();
+  for(const k of chunks.keys())if(k<c0-1||k>c1+3)chunks.delete(k);
+  if(!chunks.has(c1+1)&&!F.pending){F.pending=1;setTimeout(()=>{if(F&&R)getChunk(c1+1);if(F)F.pending=0},0)}
+  // nuages : apparition
+  F.layers.forEach((L,li)=>{const lcam=cam*L.f,top=lcam+(PY/z)*1.2+300;
+    while(L.next<top){const pp=clamp((L.next/L.f)/R.L,0,1);const dens=cloudDensity(pp)*(li?0.6:1)*(.25+.75*af)+.05;
+      L.list.push({x:(Math.random()-.5)*(Wv/z+500),ly:L.next,s:(Math.random()*CLOUDS.length)|0,k:(.6+Math.random()*.9)*L.k,fl:Math.random()<.5});L.next+=(140+Math.random()*520)/dens}
+    L.list=L.list.filter(c=>(c.ly-lcam)>-(Hv-PY)/z-400)});
+  const cloudPos=(L,c)=>({x:Wv/2+c.x*z,y:PY-(c.ly-cam*L.f)*z});
+  // ombres des nuages bas
+  ctx.globalAlpha=.22*(1-night);
+  if(night<1)F.layers[0].list.forEach(c=>{const P=cloudPos(F.layers[0],c),S=CLOUDS[c.s],w=S.w*c.k*z,h=S.h*c.k*z;ctx.drawImage(S.s,Wv/2+(P.x-Wv/2)/1.45+40*z-w/2,PY+(P.y-PY)/1.45+60*z-h/2,w,h)});
+  ctx.globalAlpha=1;
+  // nuit
+  if(night>0){ctx.globalCompositeOperation='multiply';const m=(a,b)=>Math.round(a+(b-a)*night);ctx.fillStyle=`rgb(${m(255,34)},${m(255,44)},${m(255,78)})`;ctx.fillRect(0,0,Wv,Hv);
+    ctx.globalCompositeOperation='lighter';ctx.globalAlpha=sstep(.2,1,night);ctx.save();ctx.translate(Wv/2,PY);ctx.scale(z,z);
+    for(let ci=c0;ci<=c1;ci++){const ch=chunks.get(ci);if(ch&&ch.l)ctx.drawImage(ch.l,-CW/2,cam-ci*CH-CH-.5,CW,CH+1)}
+    ctx.restore();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over'}
+  // ombre de l'avion au décollage
+  const ps=clamp(Wv*.11,84,150)/PLANE.size,sway=Math.sin(tsec*.21)*8,rot=Math.sin(tsec*.33)*.035,px=Wv/2+sway;
+  if(af<.4){const o=10+af*320,a=.38*(1-af/.4)*(1-night*.7);ctx.save();ctx.globalAlpha=a;ctx.translate(px+o,PY+o*1.2);ctx.rotate(rot);const s=ps*(1-af*.6);ctx.drawImage(PLANE.sh,-PLANE.size*s/2,-PLANE.size*s/2,PLANE.size*s,PLANE.size*s);ctx.restore()}
+  // nuages bas
+  drawCloudLayer(F.layers[0],cloudPos,z,night);
+  // traînées
+  ctx.save();ctx.translate(px,PY);ctx.rotate(rot);
+  if(af>.75){const a=(af-.75)/.25*.55*(1-night*.5);[-26,26].forEach(ex=>{const gx=ex*ps,g0=78*ps-PLANE.size*ps/2;const gr=ctx.createLinearGradient(0,g0,0,g0+260);gr.addColorStop(0,`rgba(255,255,255,${a})`);gr.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(gx-1.5,g0);ctx.lineTo(gx+1.5,g0);ctx.lineTo(gx+6,g0+260);ctx.lineTo(gx-6,g0+260);ctx.fill()})}
+  // avion
+  ctx.shadowColor='rgba(0,0,0,.35)';ctx.shadowBlur=14;ctx.shadowOffsetX=6;ctx.shadowOffsetY=10;
+  const sz=PLANE.size*ps;ctx.drawImage(PLANE.c,-sz/2,-sz/2,sz,sz);ctx.shadowColor='transparent';
+  if(night>0){ctx.globalAlpha=night*.62;ctx.drawImage(PLANE.dark,-sz/2,-sz/2,sz,sz);ctx.globalAlpha=1}
+  // feux de navigation
+  const blink=(tsec%1.2)<.08;const tip=(66-70)*ps;
+  [[-1,'#ff3b30'],[1,'#30ff6b']].forEach(([dir,col])=>{const x=dir*66*ps,y=(86-70)*ps;ctx.fillStyle=col;ctx.globalAlpha=.6+.4*night;ctx.beginPath();ctx.arc(x,y,1.6,0,6.283);ctx.fill();if(night>.2){const g=ctx.createRadialGradient(x,y,0,x,y,12);g.addColorStop(0,col);g.addColorStop(1,'rgba(0,0,0,0)');ctx.globalAlpha=.5*night;ctx.fillStyle=g;ctx.fillRect(x-12,y-12,24,24)}});
+  if(blink){ctx.globalAlpha=1;ctx.fillStyle='#fff';[-66,66].forEach(xx=>{ctx.beginPath();ctx.arc(xx*ps,(87-70)*ps,2.4,0,6.283);ctx.fill()});ctx.beginPath();ctx.arc(0,(134-70)*ps,2,0,6.283);ctx.fill()}
+  ctx.globalAlpha=1;void tip;ctx.restore();
+  // nuages hauts
+  drawCloudLayer(F.layers[1],cloudPos,z,night);
+  if(now-F.lastHud>200){F.lastHud=now;hud(T,af)}
+}
+function drawCloudLayer(L,cloudPos,z,night){
+  ctx.globalAlpha=L.a*(1-night*.55);
+  for(const c of L.list){const P=cloudPos(L,c),S=CLOUDS[c.s],w=S.w*c.k*z,h=S.h*c.k*z;if(P.y<-h||P.y>Hv+h)continue;
+    if(c.fl){ctx.save();ctx.translate(P.x,P.y);ctx.scale(-1,1);ctx.drawImage(S.c,-w/2,-h/2,w,h);ctx.restore()}else ctx.drawImage(S.c,P.x-w/2,P.y-h/2,w,h)}
+  ctx.globalAlpha=1;
+}
+function hud(T,af){
+  const d=R.d,b=blockAt(T),p=T/R.Dsec;
+  $('#tFill').style.width=(p*100)+'%';$('#tIco').style.left=(p*100)+'%';
+  $('#overLabel').textContent=F.overLabel;
+  const arr=new Date(Date.now()+(R.Dsec-T)/speedMult*1000);
+  $('#arrInfo').textContent=`Arrivée ${hhmm(arr)} · reste ${fmtMin(Math.max(0,Math.ceil((R.Dsec-T)/60)))}`;
+  const ht=$('#hudTimer');ht.classList.toggle('brk',b.type==='break');
+  $('#tLbl').textContent=b.type==='break'?`☕ Pause ${b.i}/${d.n-1} · service à bord`:`Session ${b.i}/${d.n} · révision`;
+  $('#tTime').textContent=fmtClock(b.e-T);
+  $('#tSub').textContent=`Révisé : ${fmtMin(Math.floor(workSecs(T)/60))} sur ${fmtMin(d.n*d.work)}${F.paused?' · en attente':''}${speedMult>1?` · aperçu ×${speedMult}`:''}`;
+  const alt=Math.round(af*36000/100)*100;$('#iAlt').textContent=alt.toLocaleString('fr-FR')+' ft';
+  $('#iSpd').textContent=Math.round(af<.02?0:260+620*af)+' km/h';$('#iClock').textContent=hhmm(new Date());
+  const n=skyNight();$('#iSky').textContent=n>.6?'Nuit':n>0?'Crépuscule':'Jour';
+}
+function syncSoundBtn(){$('#bSound').classList.toggle('off',!DB.settings.engine);$('#bSound').textContent=DB.settings.engine?'🔊':'🔇'}
+
+function setPaused(v){if(!F||F.arrived)return;F.accum=curElapsed();F.t0=performance.now();F.paused=v;$('#pausePanel').classList.toggle('hidden',!v);$('#bPause').textContent=v?'▶':'⏸';setEngine(!v&&DB.settings.engine)}
+$('#bPause').onclick=()=>setPaused(!F.paused);$('#bResume').onclick=()=>setPaused(false);
+$('#bSound').onclick=()=>{audioInit();DB.settings.engine=!DB.settings.engine;save();syncSoundBtn();setEngine(DB.settings.engine&&F&&!F.paused&&!F.arrived)};
+$('#bSet').onclick=openSettings;
+$('#bAbort').onclick=()=>{const T=curElapsed();$('#abortTxt').textContent=`Tu as révisé ${fmtMin(Math.floor(workSecs(T)/60))}. Le vol sera noté « dérouté » dans ton passeport${F.demo?' (sauf en mode aperçu)':''}.`;$('#mAbort').classList.remove('hidden')};
+$('#bAbortNo').onclick=()=>$('#mAbort').classList.add('hidden');
+$('#bAbortYes').onclick=()=>{$('#mAbort').classList.add('hidden');const T=curElapsed();record(false,null,T);endFlight()};
+document.addEventListener('keydown',e=>{if(!F||F.arrived||e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;if(e.code==='Space'){e.preventDefault();setPaused(!F.paused)}});
+
+function record(completed,result,T,note){
+  if(F.demo)return;
+  DB.history.push({date:new Date().toISOString(),code:R.d.code,city:R.d.city,subj:F.t.subj,obj:F.t.obj,completed,result,workMin:Math.round(workSecs(T)/60),note:note||''});
+  if(DB.history.length>300)DB.history=DB.history.slice(-300);save();
+}
+function arrive(){
+  if(F.arrived)return;F.arrived=true;F.accum=R.Dsec;F.running=false;setEngine(false);chime();
+  const d=R.d,t=F.t;let res=null;
+  document.title='🛬 Arrivé à '+d.city+' · Vol de révision';
+  $('#arriveBox').innerHTML=`<div class="big">🛬</div><h2>Bienvenue à ${esc(d.city)} !</h2><p>Le vol ${d.flt} est arrivé. Bravo, tu as tenu jusqu'au bout.</p>
+   <div class="kv"><div><small>Révision</small><b>${fmtMin(d.n*d.work)}</b></div><div><small>Matière</small><b>${esc(t.subj)}</b></div>${t.obj?`<div style="grid-column:1/-1"><small>Objectif</small><b>${esc(t.obj)}</b></div>`:''}</div>
+   <div style="text-align:left"><small style="color:var(--muted);font-weight:700;letter-spacing:.08em;font-size:11px">OBJECTIF ATTEINT ?</small>
+   <div class="choice"><button data-r="yes">✅ Oui</button><button data-r="partial" class="mid-b">🟠 En partie</button><button data-r="no">❌ Non</button></div>
+   <textarea class="inp" id="arrNote" placeholder="Note pour le prochain vol (facultatif) : ce qui reste à revoir…" style="margin-top:12px"></textarea></div>
+   ${F.demo?'<p style="margin-top:10px;font-size:12.5px">Vol en mode aperçu accéléré : il ne sera pas tamponné.</p>':''}
+   <div class="mrow"><button class="btn primary" id="bStamp">🛂 Tamponner le passeport</button></div>`;
+  $('#arrivePanel').classList.remove('hidden');
+  $('#arriveBox').querySelectorAll('.choice button').forEach(bt=>bt.onclick=()=>{res=bt.dataset.r;$('#arriveBox').querySelectorAll('.choice button').forEach(x=>{x.classList.toggle('on',x===bt);x.classList.toggle('mid',x===bt&&res==='partial');x.classList.toggle('no',x===bt&&res==='no')})});
+  $('#bStamp').onclick=()=>{record(true,res||'yes',R.Dsec,$('#arrNote').value.trim());endFlight();openPassport()};
+}
+function endFlight(){
+  cancelAnimationFrame(raf);setEngine(false);F=null;chunks.clear();document.title='Vol de révision';
+  $('#flight').classList.add('hidden');$('#airport').classList.remove('hidden');
+  selDest=null;$('#objective').value='';renderBoard();renderDestCard();updateSceneSky();
+}
+
+/* init */
+updateSceneSky();setInterval(updateSceneSky,60000);
+renderBoard();renderChips();renderDestCard();
+</script>
+</body>
+</html>
